@@ -1,6 +1,11 @@
 from postbot.databse import db
 MONGODB_DB = db['channels']
 
+class Post:
+    def __init__(self, text, media_url):
+        self.text = text
+        self.media_url = media_url
+
 
 class Channel:
     def __init__(self, channel_id, admin_id, sticker_id=None, emojis=None, schedule_time=None):
@@ -86,3 +91,19 @@ class Channel:
 
     def channel_count(cls):
         return MONGODB_DB.channels.count_documents({})
+
+def add_post(self, text, media_url):
+        post = Post(text, media_url)
+        if self.posts is None:
+            self.posts = []
+        self.posts.append(post)
+        self.update()
+
+    def remove_post(self, text, media_url):
+        post = Post(text, media_url)
+        if self.posts is not None and post in self.posts:
+            self.posts.remove(post)
+            self.update()
+
+    def get_posts(self):
+        return self.posts if self.posts is not None else []
