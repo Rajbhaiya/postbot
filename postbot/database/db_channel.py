@@ -83,3 +83,6 @@ class Channel:
 
     def get_sticker(self):
         return self.sticker_id
+
+    def channel_count(cls):
+        return MONGODB_DB.channels.count_documents({})
