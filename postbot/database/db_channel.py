@@ -6,14 +6,14 @@ class Post:
         self.text = text
         self.media_url = media_url
 
-
 class Channel:
-    def __init__(self, channel_id, admin_id, sticker_id=None, emojis=None, schedule_time=None):
+    def __init__(self, channel_id, admin_id, sticker_id=None, emojis=None, schedule_time=None, posts=None):
         self.channel_id = channel_id
         self.admin_id = admin_id
         self.sticker_id = sticker_id
         self.emojis = emojis if emojis is not None else []
         self.schedule_time = schedule_time
+        self.posts = posts if posts is not None else []
 
     def save(self):
         MONGODB_DB.channels.insert_one({
@@ -21,7 +21,8 @@ class Channel:
             'admin_id': self.admin_id,
             'sticker_id': self.sticker_id,
             'emojis': self.emojis,
-            'schedule_time': self.schedule_time
+            'schedule_time': self.schedule_time,
+            'posts': self.posts  # Save posts in the database
         })
 
     def update(self):
@@ -31,7 +32,8 @@ class Channel:
                 'admin_id': self.admin_id,
                 'sticker_id': self.sticker_id,
                 'emojis': self.emojis,
-                'schedule_time': self.schedule_time
+                'schedule_time': self.schedule_time,
+                'posts': self.posts  # Update posts in the database
             }}
         )
 
@@ -44,9 +46,11 @@ class Channel:
                 channel_data['admin_id'],
                 channel_data['sticker_id'],
                 channel_data['emojis'],
-                channel_data['schedule_time']
+                channel_data['schedule_time'],
+                channel_data['posts']  # Load posts from the database
             )
         return None
+
 
     @classmethod
     def delete(cls, channel_id):
