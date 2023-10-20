@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from pymongo.database import Database
-from Config import MONGODB_URI, MONGODB_DATABASE_NAME
+from Config import MONGODB_URI, MONGODB_NAME
 
 def start_mongodb() -> Database:
     client = MongoClient(MONGODB_URI)
