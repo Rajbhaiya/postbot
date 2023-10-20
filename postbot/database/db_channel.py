@@ -21,9 +21,16 @@ class Channel:
             'admin_id': self.admin_id,
             'sticker_id': self.sticker_id,
             'emojis': self.emojis,
-            'schedule_time': self.schedule_time,
-            'posts': self.posts  # Save posts in the database
+            'schedule_time': self.schedule_time
         })
+
+        # Save associated posts
+        for post in self.posts:
+            MONGODB_DB.posts.insert_one({
+                'channel_id': self.channel_id,
+                'text': post.text,
+                'media_url': post.media_url
+            })
 
     def update(self):
         MONGODB_DB.channels.update_one(
@@ -32,29 +39,39 @@ class Channel:
                 'admin_id': self.admin_id,
                 'sticker_id': self.sticker_id,
                 'emojis': self.emojis,
-                'schedule_time': self.schedule_time,
-                'posts': self.posts  # Update posts in the database
+                'schedule_time': self.schedule_time
             }}
         )
+
+        # Update associated posts
+        MONGODB_DB.posts.delete_many({'channel_id': self.channel_id})
+        for post in self.posts:
+            MONGODB_DB.posts.insert_one({
+                'channel_id': self.channel_id,
+                'text': post.text,
+                'media_url': post.media_url
+            })
 
     @classmethod
     def get(cls, channel_id):
         channel_data = MONGODB_DB.channels.find_one({'channel_id': channel_id})
         if channel_data:
-            return cls(
+            channel = cls(
                 channel_data['channel_id'],
                 channel_data['admin_id'],
                 channel_data['sticker_id'],
                 channel_data['emojis'],
-                channel_data['schedule_time'],
-                channel_data['posts']  # Load posts from the database
+                channel_data['schedule_time']
             )
+            post_data = MONGODB_DB.posts.find({'channel_id': channel_id})
+            channel.posts = [Post(post['text'], post['media_url']) for post in post_data]
+            return channel
         return None
-
 
     @classmethod
     def delete(cls, channel_id):
         MONGODB_DB.channels.delete_one({'channel_id': channel_id})
+        MONGODB_DB.posts.delete_many({'channel_id': channel_id})
 
     def add_schedule(self, schedule_minutes):
         if self.schedule_time is None:
@@ -95,19 +112,3 @@ class Channel:
 
     def channel_count(cls):
         return MONGODB_DB.channels.count_documents({})
-
-def add_post(self, text, media_url):
-        post = Post(text, media_url)
-        if self.posts is None:
-            self.posts = []
-        self.posts.append(post)
-        self.update()
-
-    def remove_post(self, text, media_url):
-        post = Post(text, media_url)
-        if self.posts is not None and post in self.posts:
-            self.posts.remove(post)
-            self.update()
-
-    def get_posts(self):
-        return self.posts if self.posts is not None else []
