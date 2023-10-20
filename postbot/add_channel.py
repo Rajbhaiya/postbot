@@ -2,6 +2,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
 from __main__ import bot
+from postbot.datababe.db_channel import *
+from postbot.datababe.db_users import *
 
 
 @bot.on_callback_query(filters.regex(r'^add_channel_\d+$'))
