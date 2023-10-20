@@ -1,10 +1,12 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
 from .add_channel import add_channel_callback
+from .setting import channel_settings
 from __main__ import bot
 from postbot.datababe.db_channel import *
 from postbot.datababe.db_users import *
+
+# ... (other code and imports) ...
 
 @bot.on_callback_query(filters.regex(r'^manage_channels$'))
 async def manage_channels_callback(bot, callback_query):
@@ -35,11 +37,18 @@ async def channel_options_callback(bot, callback_query):
     channel_id = int(callback_query.data.split('_')[2])
 
     buttons = [
+        [InlineKeyboardButton("Channel Settings", callback_data=f'channel_settings_{channel_id}')],
         [InlineKeyboardButton("Delete Channel", callback_data=f'delete_channel_{channel_id}')],
         [InlineKeyboardButton("Back", callback_data="manage_channels")]
     ]
 
     await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+
+@bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
+async def channel_settings_callback(bot, callback_query):
+    # Implement channel settings logic here
+    # You can create additional callback buttons to manage channel settings
+    await callback_query.answer("Channel Settings Menu:")
 
 @bot.on_callback_query(filters.regex(r'^delete_channel_\d+$'))
 async def delete_channel_callback(bot, callback_query):
