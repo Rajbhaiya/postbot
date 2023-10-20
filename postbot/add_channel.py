@@ -1,1 +1,51 @@
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
+from __main__ import bot
 
+
+@bot.on_callback_query(filters.regex(r'^add_channel_\d+$'))
+async def add_channel_callback(bot, callback_query):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    try:
+        # Check if the bot is an admin in the channel
+        bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
+
+        if bot_chat_member.status == "administrator":
+            # Ask the user to forward a message from the desired channel
+            forward_message = await bot.ask(user_id,
+                "Please forward a message from the channel you want to add. "
+                "After forwarding, I will check and complete the process. "
+                "You can also cancel this process using /cancel.",
+                timeout=300
+            )
+
+            if forward_message.forward_from_chat.type == "channel":
+                # The forwarded message is from a channel
+                channel_to_add_id = forward_message.forward_from_chat.id
+
+                try:
+                    channel_member = await bot.get_chat_member(channel_to_add_id, user_id)
+                    if channel_member.status == "administrator":
+                        # The user is an admin in the channel they want to add
+                        # Implement your database and channel management logic here
+                        # You can add the user to the channel and perform other actions
+
+                        # Respond to the user with a success message
+                        await callback_query.answer("Channel added successfully!")
+
+                        # You can also send additional messages or perform other actions here
+                    else:
+                        await callback_query.answer("You are not an admin in the channel you want to add.")
+                except UserNotParticipant:
+                    await callback_query.answer("You are not a member of the channel you want to add.")
+                except ChatAdminRequired:
+                    await callback_query.answer("Bot is not an admin in the channel.")
+            else:
+                await callback_query.answer("Please forward a message from a channel.")
+        else:
+            await callback_query.answer("Bot is not an admin in the channel.")
+    except ChatAdminRequired:
+        await callback_query.answer("Bot is not an admin in the channel.")
