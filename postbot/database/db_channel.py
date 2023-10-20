@@ -1,4 +1,6 @@
 from postbot.databse import db
+MONGODB_DB = db['channels']
+
 
 class Channel:
     def __init__(self, channel_id, admin_id, sticker_id=None, emojis=None, schedule_time=None):
