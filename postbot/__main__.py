@@ -2,9 +2,8 @@ from pyromod import listen
 from pyrogram import Client, idle
 from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid
 from Config import LOGGER
-from postbot import
 
-from postbot import add_channel, manage_channel, send_post, start, setting
+from postbot import bot, add_channel, manage_channel, send_post, start, setting
 
 
 
