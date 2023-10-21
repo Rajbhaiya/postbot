@@ -1,8 +1,8 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from .add_channel import add_channel_callback
-from .manage_channel import manage_channels_callback
-from .send_post import send_post_callback
+from .add_channel import *
+from .manage_channel import *
+from .send_post import *
 from postbot import bot
 
 @bot.on_message(filters.command("start"))
