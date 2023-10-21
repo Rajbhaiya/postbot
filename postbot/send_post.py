@@ -146,12 +146,11 @@ async def react_callback(bot, callback_query):
     user_id = callback_query.from_user.id
     channel_id, emoji = callback_query.data.split('_')[1:]
 
-    # Implement logic to count reactions to posts based on emoji
-    # You can update the post and store the reaction data in your database
-
-    # Let's assume you have a Reaction class to handle this
+    # Create an instance of the Reaction class for the specific channel and emoji
     reaction = Reaction(channel_id, emoji)
-    reaction.add_reaction(user_id)  # Add the user's reaction
+
+    # Use the Reaction class to add the user's reaction
+    reaction.add_reaction(user_id)
 
     await callback_query.answer(f"You reacted with {emoji}")
 
