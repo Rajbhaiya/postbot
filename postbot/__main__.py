@@ -4,7 +4,8 @@ from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvali
 from Config import LOGGER
 from postbot import
 
-from postbot import add_channel
+from postbot import add_channel, manage_channel, send_post, start, setting
+
 
 
 # Run Bot
