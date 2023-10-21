@@ -8,12 +8,19 @@ temp_buttons = {}
 
 # When a user adds emojis to a channel, store them in the dictionary
 def add_emojis(channel_id, emojis):
-    temp_emojis[channel_id] = emojis
+    if channel_id in temp_emojis:
+        temp_emojis[channel_id].extend(emojis)
+    else:
+        temp_emojis[channel_id] = emojis
 
 # When a user decides to delete emojis, remove them from the dictionary
 def delete_emojis(channel_id):
     if channel_id in temp_emojis:
         del temp_emojis[channel_id]
+
+def delete_temp_buttons(channel_id):
+    if channel_id in temp_buttons:
+        del temp_buttons[channel_id]
 
 # When a post is sent successfully, clear the emojis and buttons for that channel
 def clear_data(channel_id):
@@ -149,14 +156,16 @@ async def add_emoji_callback(bot, callback_query):
         ]
 
         # Add a "Done" button to finish emoji selection
-        done_button = [InlineKeyboardButton("Done", callback_data=f'done_{channel_id}')]
+        delete_emoji = [InlineKeyboardButton("Delete Emoji", callback_data=f'cancel_emoji_{channel_id}')]
 
         # Present the user with emoji selection buttons
-        buttons = emoji_buttons + [done_button]
+        buttons = emoji_buttons + delete_emoji
 
         await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
         await callback_query.answer("Emojis added successfully.")
+
+    await callback_query.answer("Emoji selection canceled.")
 @bot.on_callback_query(filters.regex(r'^cancel_emoji_\d+$'))
 async def cancel_emoji_selection(bot, callback_query):
     user_id = callback_query.from_user.id
@@ -180,15 +189,6 @@ async def react_callback(bot, callback_query):
     reaction.add_reaction(user_id)
 
     await callback_query.answer(f"You reacted with {emoji}")
-
-@bot.on_callback_query(filters.regex(r'^done_\d+$'))
-async def done_callback(bot, callback_query):
-    user_id = callback_query.from_user.id
-
-    # Implement logic to finalize emoji selection for the post
-    # You can save the reactions and update the post
-
-    await callback_query.answer("Emoji selection is complete.")
 
 @bot.on_callback_query(filters.regex(r'^add_link_button_\d+$'))
 async def add_link_button_callback(bot, callback_query):
@@ -221,6 +221,13 @@ async def add_link_button_callback(bot, callback_query):
 
         # Store the link buttons temporarily
         temp_buttons[channel_id] = link_buttons
+        
+        delete_url = [InlineKeyboardButton("Delete URL", callback_data=f'delete_buttons_{channel_id}')]
+
+        # Present the user with emoji selection buttons
+        buttons = emoji_buttons + links_buttons + delete_emoji + delete_url
+
+        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))        
 
         await callback_query.answer("Link buttons added successfully.")
     else:
