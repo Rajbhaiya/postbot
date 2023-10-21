@@ -110,7 +110,7 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
     else:
         await callback_query.answer("No emojis or buttons found for this channel.")
 
-@bot.on_callback_query(filters.regex(r'^send_post_\d+$'))
+@bot.on_callback_query(filters.regex(r'^send_post$'))
 async def send_post_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[1])
