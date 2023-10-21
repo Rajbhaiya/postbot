@@ -3,7 +3,7 @@ import pymongo
 import logging
 from pymongo.errors import ServerSelectionTimeoutError
 from motor import motor_asyncio
-import Config
+from Config import DB_URL
 
 mongodb_client = pymongo.MongoClient(DB_URL, 27017)
 motor = motor_asyncio.AsyncIOMotorClient(DB_URL, 27017)
