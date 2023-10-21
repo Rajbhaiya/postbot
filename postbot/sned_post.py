@@ -1,34 +1,7 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
-from pyrogram.errors import UserNotParticipant
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from postbot.database.db_channel import Channel
-from postbot.database.db_users import Users
-
-bot = Client("my_bot")
-
-@bot.on_message(filters.text & filters.incoming & filters.private)
-async def send_post_text_message(bot, message):
-    user_id = message.from_user.id
-
-    if (user_id, message.chat.id) not in bot.registered_callbacks:
-        return
-
-    # Save the text message as the post
-    text = message.text
-    user = Users.get(user_id)
-
-    channel_id = message.chat.id
-    channel = Channel.get(channel_id)
-    media_url = None  # Media URL for the post (you can set it as needed)
-
-    # Create and save the post
-    if channel and channel_id not in user.channels:
-        user.channels.append(channel_id)
-        user.save()
-    post = channel.add_post(text, media_url)
-
-    bot.registered_callbacks.remove((user_id, channel_id))
-    await message.reply("Your post has been saved.")
+from postbot.database.db_reaction import Reaction
 
 @bot.on_message((filters.document | filters.video | filters.audio | filters.photo) & filters.incoming & filters.private)
 async def send_post_media_message(bot, message):
@@ -94,25 +67,64 @@ async def add_emoji_callback(bot, callback_query):
 
     # Create a button for each emoji
     emoji_buttons = [
-        [InlineKeyboardButton(emoji, callback_data=f"react_{channel_id}_{emoji}")] for emoji in emojis
+        [InlineKeyboardButton(emoji, callback_data=f'react_{channel_id}_{emoji}')] for emoji in emojis
     ]
 
     # Add a "Done" button to finish emoji selection
-    done_button = [InlineKeyboardButton("Done", callback_data=f"done_emojis_{channel_id}")]
+    done_button = [InlineKeyboardButton("Done", callback_data=f'done_{channel_id}')]
 
     # Present the user with emoji selection buttons
     buttons = emoji_buttons + [done_button]
 
     await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
-# Add your emoji reaction handling code here
-
-@bot.on_callback_query(filters.regex(r'^done_emojis_\d+$'))
-async def done_emojis_callback(bot, callback_query):
+@bot.on_callback_query(filters.regex(r'^react_\d+_.+$'))
+async def react_callback(bot, callback_query):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id, emoji = callback_query.data.split('_')[1:]
+
+    # Implement logic to count reactions to posts based on emoji
+    # You can update the post and store the reaction data in your database
+
+    # Let's assume you have a Reaction class to handle this
+    reaction = Reaction(channel_id, emoji)
+    reaction.add_reaction(user_id)  # Add the user's reaction
+
+    await callback_query.answer(f"You reacted with {emoji}")
+
+@bot.on_callback_query(filters.regex(r'^done_\d+$'))
+async def done_callback(bot, callback_query):
+    user_id = callback_query.from_user.id
 
     # Implement logic to finalize emoji selection for the post
     # You can save the reactions and update the post
 
     await callback_query.answer("Emoji selection is complete.")
+
+@bot.on_callback_query(filters.regex(r'^add_link_\d+$'))
+async def add_link_callback(bot, callback_query):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    instructions = ("**Buttons Format:** \n\n"
+                    "A button should have a text and a URL separated by '`-`'. \ntext - link\n"
+                    "Example: \n`Google - google.com` \n\n"
+                    "For multiple buttons in a single row, use '`|`'. Write them in one line!!. \ntext1 - link1 | text2 - link2\n"
+                    "Example: \n`Google - google.com | Telegram - telegram.org`. \n"
+                    "For multiple rows, write them in different lines. \ntext1 - link1\ntext2 - link2\n"
+                    "Example: \n`Google - google.com \n"
+                    "Telegram - telegram.org | Change - change.org \n"
+                    "Wikipedia - wikipedia.org` \n\n\n"
+                    "Now Please **send the buttons** in this format or /cancel the process. \n\n")
+
+    await bot.send_message(user_id, instructions)
+
+@bot.on_callback_query(filters.regex(r'^delete_buttons_\d+$'))
+async def delete_buttons_callback(bot, callback_query):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    # Implement code to delete buttons for the specific channel
+    # You can update your database to remove buttons associated with this channel
+
+    await callback_query.answer("Buttons deleted successfully.")
