@@ -1,9 +1,9 @@
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
+# Import the necessary modules
+from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.errors import ChatAdminRequired, UserNotParticipant
 from postbot import bot
 from postbot.database.db_channel import *
-from postbot.database.db_users import *
+from postbot.database.db_users import Users
 
 # Define the add_channel function
 
@@ -60,10 +60,11 @@ async def add_channel(user_id, channel_id):
 
 # Add this function to your code
 
-@bot.on_callback_query(filters.regex(r'^\add_channel_$'))
+@bot.on_callback_query(filters.regex(r'^add_channel_1$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
+    channel_id = callback_query.data.split("_")[1]
 
     # Call the add_channel function
-    await add_channel(user_id, channel_id)
+    await add_channel(user_id, int(channel_id))
     await callback_query.answer("Processing your request...")  # Notify the user that the request is being processed
