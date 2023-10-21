@@ -20,6 +20,3 @@ async def start(bot, message):
 
     # Send a welcome message with the keyboard
     await message.reply("Welcome to your bot!\nPlease choose an action:", reply_markup=keyboard)
-
-if __name__ == "__main__":
-    bot.run()
