@@ -3,3 +3,4 @@ loguru
 TgCrypto
 pymongo
 motor
+pyromod
