@@ -61,7 +61,7 @@ async def add_channel(user_id, channel_id):
 
 # Add this function to your code
 
-@bot.on_callback_query(filters.regex(r'^add_channel_\d+'))
+@bot.on_callback_query(filters.regex(r'^\\add_channel_$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     callback_data = callback_query.data
