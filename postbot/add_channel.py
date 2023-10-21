@@ -31,7 +31,7 @@ async def add_channel(user_id, channel_id):
                         # The user is an admin in the channel they want to add
 
                         # Database Logic - Check if the channel is already in the user's list
-                        user = Users.get(user_id)
+                        user = await Users.get(user_id)
                         if user:
                             if channel_id in user.channels:
                                 await forward_message.reply("Channel is already added.")
@@ -60,10 +60,9 @@ async def add_channel(user_id, channel_id):
 
 # Add this function to your code
 
-@bot.on_callback_query(filters.regex(r'^\add_channel_\d$'))
+@bot.on_callback_query(filters.regex(r'^\add_channel_$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
 
     # Call the add_channel function
     await add_channel(user_id, channel_id)
