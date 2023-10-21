@@ -8,7 +8,7 @@ from Config import LOGGER
 
 
 
-app = Client(
+bot = Client(
     "channel_bot",
     api_id=Config.API_ID,
     api_hash=Config.API_HASH,
@@ -20,13 +20,13 @@ app = Client(
 # Run Bot
 if __name__ == "__main__":
     try:
-        app.start()
+        bot.start()
     except (ApiIdInvalid, ApiIdPublishedFlood):
         raise Exception("Your API_ID/API_HASH is not valid.")
     except AccessTokenInvalid:
         raise Exception("Your BOT_TOKEN is not valid.")
-    uname = app.me.username
+    uname = bot.me.username
     LOGGER.info(f"Started Successfully!")
     idle()
-    app.stop()
+    bot.stop()
     LOGGER.info("Bot stopped. Alvida!")
