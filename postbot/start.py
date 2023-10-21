@@ -3,7 +3,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from .add_channel import add_channel_callback
 from .manage_channel import manage_channels_callback
 from .send_post import send_post_callback
-from main import bot
+from postbot import bot
 
 @bot.on_message(filters.command("start"))
 async def start(bot, message:Message):
