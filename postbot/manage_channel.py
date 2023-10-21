@@ -3,8 +3,8 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from .add_channel import add_channel_callback
 from .setting import channel_settings_callback
 from app import bot
-from postbot.datababe.db_channel import *
-from postbot.datababe.db_users import *
+from postbot.database.db_channel import *
+from postbot.database.db_users import *
 
 # ... (other code and imports) ...
 
