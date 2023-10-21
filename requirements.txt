@@ -4,4 +4,4 @@ loguru
 TgCrypto
 pymongo
 motor
-pyromod
+pyromod~=1.5
