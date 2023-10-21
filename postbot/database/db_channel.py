@@ -112,32 +112,3 @@ class Channel:
 
     def channel_count(cls):
         return MONGODB_DB.channels.count_documents({})
-
-    def save_reaction(self, post_id, emoji):
-        if not self.reactions:
-            self.reactions = {}
-        if post_id in self.reactions:
-            if emoji in self.reactions[post_id]:
-                self.reactions[post_id][emoji] += 1
-            else:
-                self.reactions[post_id][emoji] = 1
-        else:
-            self.reactions[post_id] = {emoji: 1}
-        self.update()
-
-    def get_reactions(self, post_id):
-        if self.reactions and post_id in self.reactions:
-            return self.reactions[post_id]
-        return {}
-
-    def remove_reaction(self, post_id, emoji):
-        if self.reactions and post_id in self.reactions:
-            if emoji in self.reactions[post_id]:
-                self.reactions[post_id][emoji] -= 1
-                if self.reactions[post_id][emoji] <= 0:
-                    del self.reactions[post_id][emoji]
-                    if not self.reactions[post_id]:
-                        del self.reactions[post_id]
-                self.update()
-                return True
-        return False
