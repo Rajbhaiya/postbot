@@ -65,11 +65,17 @@ async def add_channel(user_id, channel_id):
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     callback_data = callback_query.data
-    # Split the callback data to extract the channel_id
-    _, channel_id = callback_data.split("_")
 
+    # Check if the callback data follows the correct format
+    if not callback_data.startswith('add_channel_'):
+        await callback_query.answer("Invalid callback data format.")
+        return
+
+    # Extract the channel_id
+    channel_id_str = callback_data[len('add_channel_'):]
+    
     try:
-        channel_id = int(channel_id)
+        channel_id = int(channel_id_str)
     except ValueError:
         # Handle the case where channel_id is not a valid integer
         await callback_query.answer("Invalid channel ID provided.")
