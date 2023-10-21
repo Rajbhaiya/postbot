@@ -1,6 +1,6 @@
 from pyrogram import emoji
 from pyrogram.types import InlineKeyboardButton
-from postbot.database.db_channel import get
+from postbot.database.db_channel import *
 from app import bot
 
 
