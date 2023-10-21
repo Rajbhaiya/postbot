@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Message
 from postbot.database.db_channel import Channel
 from postbot.database.db_reaction import Reaction
 from main import bot
@@ -30,7 +30,7 @@ def clear_data(channel_id):
 
 
 @bot.on_message((filters.document | filters.video | filters.audio | filters.photo) & filters.incoming & filters.private)
-async def send_post_media_message(bot, message):
+async def send_post_media_message(bot, message: Message):
     user_id = message.from_user.id
 
     if (user_id, message.chat.id) not in bot.registered_callbacks:
@@ -65,7 +65,7 @@ async def send_post_media_message(bot, message):
     await message.reply("Your post with media has been saved.")
 
 @bot.on_callback_query(filters.regex(r'^send_post_final_\d+$'))
-async def send_post_final_callback(bot, callback_query):
+async def send_post_final_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[1])
 
@@ -111,7 +111,7 @@ async def send_post_final_callback(bot, callback_query):
         await callback_query.answer("No emojis or buttons found for this channel.")
 
 @bot.on_callback_query(filters.regex(r'^send_post_\d+$'))
-async def send_post_callback(bot, callback_query):
+async def send_post_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[1])
 
@@ -130,7 +130,7 @@ async def send_post_callback(bot, callback_query):
     await callback_query.edit_message_text("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons))
                                            
 @bot.on_callback_query(filters.regex(r'^add_emoji_\d+$'))
-async def add_emoji_callback(bot, callback_query):
+async def add_emoji_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
@@ -168,7 +168,7 @@ async def add_emoji_callback(bot, callback_query):
 
     await callback_query.answer("Emoji selection canceled.")
 @bot.on_callback_query(filters.regex(r'^cancel_emoji_\d+$'))
-async def cancel_emoji_selection(bot, callback_query):
+async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
@@ -179,7 +179,7 @@ async def cancel_emoji_selection(bot, callback_query):
     await callback_query.answer("Emoji selection canceled.")
 
 @bot.on_callback_query(filters.regex(r'^react_\d+_.+$'))
-async def react_callback(bot, callback_query):
+async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id, emoji = callback_query.data.split('_')[1:]
 
@@ -192,7 +192,7 @@ async def react_callback(bot, callback_query):
     await callback_query.answer(f"You reacted with {emoji}")
 
 @bot.on_callback_query(filters.regex(r'^add_link_button_\d+$'))
-async def add_link_button_callback(bot, callback_query):
+async def add_link_button_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
@@ -235,7 +235,7 @@ async def add_link_button_callback(bot, callback_query):
         await callback_query.answer("No link buttons provided.")
 
 @bot.on_callback_query(filters.regex(r'^delete_buttons_\d+$'))
-async def delete_buttons_callback(bot, callback_query):
+async def delete_buttons_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
