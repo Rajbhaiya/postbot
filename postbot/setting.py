@@ -1,5 +1,5 @@
 from pyrogram import emoji, filters
-from pyrogram.types import InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from postbot.database.db_channel import *
 from app import bot
 
