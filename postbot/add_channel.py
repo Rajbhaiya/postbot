@@ -72,7 +72,7 @@ async def add_channel_callback(bot, callback_query: CallbackQuery):
         return
 
     # Extract the channel_id
-    channel_id_str = callback_data[len('add_channel'):]
+    channel_id_str = callback_data[len('add_channel_'):]
     
     try:
         channel_id = int(channel_id_str)
