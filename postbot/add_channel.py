@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
-from app import bot
+from main import bot
 from postbot.database.db_channel import *
 from postbot.database.db_users import *
 
