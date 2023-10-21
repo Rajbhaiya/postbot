@@ -5,7 +5,7 @@ from main import bot
 
 
 @bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
-async def channel_settings_callback(bot, callback_query):
+async def channel_settings_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[2])
 
     text, markup, sticker_id = await channel_settings(channel_id, bot)
@@ -16,7 +16,7 @@ async def channel_settings_callback(bot, callback_query):
         await callback_query.message.delete()
 
 @bot.on_callback_query(filters.regex(r'^edit_emojis_\d+$'))
-async def edit_emojis_callback(bot, callback_query):
+async def edit_emojis_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
@@ -38,7 +38,7 @@ async def edit_emojis_callback(bot, callback_query):
         await callback_query.answer("Invalid input. Please send emojis separated by commas.")
 
 @bot.on_callback_query(filters.regex(r'^edit_sticker_\d+$'))
-async def edit_sticker_callback(bot, callback_query):
+async def edit_sticker_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
