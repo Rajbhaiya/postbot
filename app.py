@@ -1,4 +1,4 @@
-import Config
+from Config import *
 
 from pyromod import listen
 from pyrogram import Client, idle
@@ -9,7 +9,7 @@ from Config import LOGGER
 
 
 bot = Client(
-    "channel_bot",
+    "bot",
     api_id=Config.API_ID,
     api_hash=Config.API_HASH,
     bot_token=Config.BOT_TOKEN,
