@@ -126,7 +126,7 @@ async def send_post_callback(bot, callback_query):
         [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{channel_id}")],
     ]
 
-    await callback_query.edit_message_text("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons)
+    await callback_query.edit_message_text("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons))
                                            
 @bot.on_callback_query(filters.regex(r'^add_emoji_\d+$'))
 async def add_emoji_callback(bot, callback_query):
