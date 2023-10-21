@@ -38,6 +38,44 @@ async def send_post_media_message(bot, message):
     bot.registered_callbacks.remove((user_id, channel_id))
     await message.reply("Your post with media has been saved.")
 
+@bot.on_callback_query(filters.regex(r'^send_post_final_\d+$'))
+async def send_post_final_callback(bot, callback_query):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[1])
+
+    # Collect the data that you've gathered in previous steps
+    # Replace these variables with the actual data you've collected
+    text = "Your post text here"
+    media_url = "Your media URL here"
+    emoji = "Selected emoji here"
+    link_buttons = ["Button 1 - URL 1", "Button 2 - URL 2"]  # Replace with actual buttons
+
+    # Construct the post message
+    post_message = text
+    if media_url:
+        post_message += f"\n{media_url}"
+
+    # Add emojis to the post
+    if emoji:
+        post_message += f"\n{emoji}"
+
+    # Add link buttons to the post
+    if link_buttons:
+        post_message += "\n\nLinks:\n"
+        post_message += "\n".join(link_buttons)
+
+    try:
+        # Send the post to the selected channel
+        # Replace `channel_id` with the actual channel where you want to send the post
+        await bot.send_message(channel_id, post_message)
+
+        # You can also implement any other logic you need for sending the post
+
+        await callback_query.answer("Post sent successfully.")
+    except Exception as e:
+        # Handle any exceptions that may occur during the message sending process
+        await callback_query.answer(f"Failed to send the post: {str(e)}")
+
 @bot.on_callback_query(filters.regex(r'^send_post_\d+$'))
 async def send_post_callback(bot, callback_query):
     user_id = callback_query.from_user.id
