@@ -1,4 +1,4 @@
-from pyrogram import emoji
+from pyrogram import emoji, filters
 from pyrogram.types import InlineKeyboardButton
 from postbot.database.db_channel import *
 from app import bot
