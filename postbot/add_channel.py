@@ -60,14 +60,11 @@ async def add_channel(user_id, channel_id):
 
 # Add this function to your code
 
-@bot.on_callback_query(filters.regex(r'^add_channel_$'))
-async def add_channel_callback(bot, callback_query):
+@bot.on_callback_query(filters.regex(r'^add_channel_\d$'))
+async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
     # Call the add_channel function
     await add_channel(user_id, channel_id)
     await callback_query.answer("Processing your request...")  # Notify the user that the request is being processed
-
-def register_handlers(bot):
-    bot.add_callback_query_handler(add_channel_)
