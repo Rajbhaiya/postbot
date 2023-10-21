@@ -2,6 +2,23 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from postbot.database.db_channel import Channel
 from postbot.database.db_reaction import Reaction
+temp_emojis = {}
+temp_buttons = {}
+
+# When a user adds emojis to a channel, store them in the dictionary
+def add_emojis(channel_id, emojis):
+    temp_emojis[channel_id] = emojis
+
+# When a user decides to delete emojis, remove them from the dictionary
+def delete_emojis(channel_id):
+    if channel_id in temp_emojis:
+        del temp_emojis[channel_id]
+
+# When a post is sent successfully, clear the emojis and buttons for that channel
+def clear_data(channel_id):
+    delete_emojis(channel_id)
+    delete_buttons(channel_id)
+
 
 @bot.on_message((filters.document | filters.video | filters.audio | filters.photo) & filters.incoming & filters.private)
 async def send_post_media_message(bot, message):
@@ -50,31 +67,39 @@ async def send_post_final_callback(bot, callback_query):
     emoji = "Selected emoji here"
     link_buttons = ["Button 1 - URL 1", "Button 2 - URL 2"]  # Replace with actual buttons
 
-    # Construct the post message
-    post_message = text
-    if media_url:
-        post_message += f"\n{media_url}"
+    # Retrieve the stored emojis and buttons for this channel
+    if channel_id in temp_emojis and channel_id in temp_buttons:
+        emojis = temp_emojis[channel_id]
+        link_buttons = temp_buttons[channel_id]
 
-    # Add emojis to the post
-    if emoji:
-        post_message += f"\n{emoji}"
+        # Construct the post message with emojis and buttons
+        post_message = text
+        if media_url:
+            post_message += f"\n{media_url}"
 
-    # Add link buttons to the post
-    if link_buttons:
-        post_message += "\n\nLinks:\n"
-        post_message += "\n".join(link_buttons)
+        # Add emojis to the post
+        if emoji:
+            post_message += f"\n{emoji}"
 
-    try:
-        # Send the post to the selected channel
-        # Replace `channel_id` with the actual channel where you want to send the post
-        await bot.send_message(channel_id, post_message)
+        # Add link buttons to the post
+        if link_buttons:
+            post_message += "\n\nLinks:\n"
+            post_message += "\n".join(link_buttons)
 
-        # You can also implement any other logic you need for sending the post
+        try:
+            # Send the post to the selected channel
+            # Replace `channel_id` with the actual channel where you want to send the post
+            await bot.send_message(channel_id, post_message)
 
-        await callback_query.answer("Post sent successfully.")
-    except Exception as e:
-        # Handle any exceptions that may occur during the message sending process
-        await callback_query.answer(f"Failed to send the post: {str(e)}")
+            # Clear the emojis and buttons for this channel
+            clear_data(channel_id)
+
+            await callback_query.answer("Post sent successfully.")
+        except Exception as e:
+            # Handle any exceptions that may occur during the message sending process
+            await callback_query.answer(f"Failed to send the post: {str(e)}")
+    else:
+        await callback_query.answer("No emojis or buttons found for this channel.")
 
 @bot.on_callback_query(filters.regex(r'^send_post_\d+$'))
 async def send_post_callback(bot, callback_query):
@@ -93,8 +118,8 @@ async def send_post_callback(bot, callback_query):
         [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{channel_id}")],
     ]
 
-    await callback_query.edit_message_text("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons))
-
+    await callback_query.edit_message_text("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons)
+                                           
 @bot.on_callback_query(filters.regex(r'^add_emoji_\d+$'))
 async def add_emoji_callback(bot, callback_query):
     user_id = callback_query.from_user.id
@@ -156,13 +181,3 @@ async def add_link_callback(bot, callback_query):
                     "Now Please **send the buttons** in this format or /cancel the process. \n\n")
 
     await bot.send_message(user_id, instructions)
-
-@bot.on_callback_query(filters.regex(r'^delete_buttons_\d+$'))
-async def delete_buttons_callback(bot, callback_query):
-    user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
-
-    # Implement code to delete buttons for the specific channel
-    # You can update your database to remove buttons associated with this channel
-
-    await callback_query.answer("Buttons deleted successfully.")
