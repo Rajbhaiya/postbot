@@ -100,14 +100,14 @@ class Channel:
                     self.emojis.remove(emoji)
         await self.update()
 
-    def get_emojis(self):
+    async def get_emojis(self):
         return self.emojis if self.emojis is not None else []
 
-    def set_sticker(self, sticker_id):
+    async def set_sticker(self, sticker_id):
         self.sticker_id = sticker_id
         await self.update()
 
-    def get_sticker(self):
+    async def get_sticker(self):
         return self.sticker_id
 
     @classmethod
