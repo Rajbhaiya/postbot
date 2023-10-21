@@ -1,6 +1,7 @@
 # Import the necessary modules
 from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant
+from pyrogram import filters
 from postbot import bot
 from postbot.database.db_channel import *
 from postbot.database.db_users import Users
