@@ -1,6 +1,6 @@
 from pyrogram import emoji
 from pyrogram.types import InlineKeyboardButton
-from channelpost.database.db_channel import get_channel_info
+from channelpost.database.db_channel import get
 
 
 @bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
