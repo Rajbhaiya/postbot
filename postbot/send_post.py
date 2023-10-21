@@ -126,21 +126,47 @@ async def add_emoji_callback(bot, callback_query):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
-    # Create a list of emojis (you can replace these with the actual emojis you want)
-    emojis = ["👍", "👌", "❤️", "😃", "🔥"]
+    # Create a list to store emojis
+    emojis = []
 
-    # Create a button for each emoji
-    emoji_buttons = [
-        [InlineKeyboardButton(emoji, callback_data=f'react_{channel_id}_{emoji}')] for emoji in emojis
-    ]
+    # Prompt the user to send emojis and store them temporarily
+    await bot.send_message(user_id, "Please send the emojis separated by commas (e.g., 😀, 😂, 😍)")
 
-    # Add a "Done" button to finish emoji selection
-    done_button = [InlineKeyboardButton("Done", callback_data=f'done_{channel_id}')]
+    # Wait for the user to send the emojis
+    emojis_message = await bot.listen(user_id, timeout=300)
 
-    # Present the user with emoji selection buttons
-    buttons = emoji_buttons + [done_button]
+    if emojis_message.text:
+        # Split the user's input into emojis
+        emoji_texts = emojis_message.text.split(',')
+        emojis = [emoji.strip() for emoji in emoji_texts]
 
-    await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        # Store the emojis temporarily
+        add_emojis(channel_id, emojis)
+
+        # Create a button for each emoji
+        emoji_buttons = [
+            [InlineKeyboardButton(emoji, callback_data=f'react_{channel_id}_{emoji}')] for emoji in emojis
+        ]
+
+        # Add a "Done" button to finish emoji selection
+        done_button = [InlineKeyboardButton("Done", callback_data=f'done_{channel_id}')]
+
+        # Present the user with emoji selection buttons
+        buttons = emoji_buttons + [done_button]
+
+        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+
+        await callback_query.answer("Emojis added successfully.")
+@bot.on_callback_query(filters.regex(r'^cancel_emoji_\d+$'))
+async def cancel_emoji_selection(bot, callback_query):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    # Remove the stored emojis from temp_emojis for this channel
+    if channel_id in temp_emojis:
+        del temp_emojis[channel_id]
+
+    await callback_query.answer("Emoji selection canceled.")
 
 @bot.on_callback_query(filters.regex(r'^react_\d+_.+$'))
 async def react_callback(bot, callback_query):
@@ -164,20 +190,48 @@ async def done_callback(bot, callback_query):
 
     await callback_query.answer("Emoji selection is complete.")
 
-@bot.on_callback_query(filters.regex(r'^add_link_\d+$'))
-async def add_link_callback(bot, callback_query):
+@bot.on_callback_query(filters.regex(r'^add_link_button_\d+$'))
+async def add_link_button_callback(bot, callback_query):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
-    instructions = ("**Buttons Format:** \n\n"
-                    "A button should have a text and a URL separated by '`-`'. \ntext - link\n"
-                    "Example: \n`Google - google.com` \n\n"
-                    "For multiple buttons in a single row, use '`|`'. Write them in one line!!. \ntext1 - link1 | text2 - link2\n"
-                    "Example: \n`Google - google.com | Telegram - telegram.org`. \n"
-                    "For multiple rows, write them in different lines. \ntext1 - link1\ntext2 - link2\n"
-                    "Example: \n`Google - google.com \n"
-                    "Telegram - telegram.org | Change - change.org \n"
-                    "Wikipedia - wikipedia.org` \n\n\n"
-                    "Now Please **send the buttons** in this format or /cancel the process. \n\n")
+    # Implement the logic to handle adding link buttons
+    instructions = "Please send the link buttons using the specified format. " \
+                   "A button should have a text and a URL separated by '-'.\n" \
+                   "Example: 'Google - google.com'\n\n" \
+                   "For multiple buttons in a single row, use '|'. Write them in one line.\n" \
+                   "Example: 'Google - google.com | Telegram - telegram.org'\n\n" \
+                   "For multiple rows, write them in different lines.\n" \
+                   "Example:\n" \
+                   "Google - google.com\n" \
+                   "Telegram - telegram.org\n" \
+                   "Change - change.org\n" \
+                   "Wikipedia - wikipedia.org'\n\n" \
+                   "Now please send the buttons in this format or /cancel the process."
 
     await bot.send_message(user_id, instructions)
+
+    # Wait for the user to send the link buttons
+    link_buttons_message = await bot.listen(user_id, timeout=300)
+
+    if link_buttons_message.text:
+        # Split the user's input into individual link buttons
+        link_buttons_texts = link_buttons_message.text.split('|')
+        link_buttons = [button.strip() for button in link_buttons_texts]
+
+        # Store the link buttons temporarily
+        temp_buttons[channel_id] = link_buttons
+
+        await callback_query.answer("Link buttons added successfully.")
+    else:
+        await callback_query.answer("No link buttons provided.")
+
+@bot.on_callback_query(filters.regex(r'^delete_buttons_\d+$'))
+async def delete_buttons_callback(bot, callback_query):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    # Implement code to delete buttons for the specific channel
+    delete_temp_buttons(channel_id)
+
+    await callback_query.answer("Buttons deleted successfully.")
