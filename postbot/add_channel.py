@@ -77,4 +77,4 @@ async def add_channel_callback(bot, callback_query: CallbackQuery):
 
     # Call the add_channel function
     await add_channel(user_id, channel_id)
-    await callback_query.answer("Processing your request...") d
+    await callback_query.answer("Processing your request...")
