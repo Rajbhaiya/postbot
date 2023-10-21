@@ -10,8 +10,8 @@ class Reaction:
         self.emoji = emoji
         self.count = count
 
-    def save(self):
-        MONGODB_DB.reactions.insert_one({
+    async def save(self):
+        await MONGODB_DB.reactions.insert_one({
             'channel_id': self.channel_id,
             'post_id': self.post_id,
             'emoji': self.emoji,
@@ -21,8 +21,8 @@ class Reaction:
     # Add other methods to update and retrieve reactions as needed
 
     @classmethod
-    def get(cls, channel_id, post_id, emoji):
-        reaction_data = MONGODB_DB.reactions.find_one({
+    async def get(cls, channel_id, post_id, emoji):
+        reaction_data = await MONGODB_DB.reactions.find_one({
             'channel_id': channel_id,
             'post_id': post_id,
             'emoji': emoji
