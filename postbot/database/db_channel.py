@@ -112,3 +112,15 @@ class Channel:
 
     def channel_count(cls):
         return MONGODB_DB.channels.count_documents({})
+
+    @classmethod
+    async def get_channel_info(cls, channel_id):
+        channel_data = MONGODB_DB.channels.find_one({'channel_id': channel_id})
+        if channel_data:
+            return True, {
+                'channel_id': channel_data['channel_id'],
+                'admin_id': channel_data['admin_id'],
+                'sticker_id': channel_data['sticker_id'],
+                'emojis': channel_data['emojis']
+            }
+        return False, {}
