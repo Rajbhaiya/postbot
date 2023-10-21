@@ -9,7 +9,7 @@ from postbot.database.db_users import *
 # ... (other code and imports) ...
 
 @bot.on_callback_query(filters.regex(r'^manage_channels$'))
-async def manage_channels_callback(bot, callback_query):
+async def manage_channels_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
     # Get the user's channels
@@ -32,7 +32,7 @@ async def manage_channels_callback(bot, callback_query):
     await callback_query.edit_message_text("Your channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^channel_options_\d+$'))
-async def channel_options_callback(bot, callback_query):
+async def channel_options_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
@@ -45,13 +45,13 @@ async def channel_options_callback(bot, callback_query):
     await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
-async def channel_settings_callback(bot, callback_query):
+async def channel_settings_callback(bot, callback_query: CallbackQuery):
     # Implement channel settings logic here
     # You can create additional callback buttons to manage channel settings
     await callback_query.answer("Channel Settings Menu:")
 
 @bot.on_callback_query(filters.regex(r'^delete_channel_\d+$'))
-async def delete_channel_callback(bot, callback_query):
+async def delete_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
