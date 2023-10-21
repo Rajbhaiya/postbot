@@ -15,7 +15,7 @@ class Channel:
         self.schedule_time = schedule_time
         self.posts = posts if posts is not None else []
 
-    def save(self):
+    async def save(self):
         MONGODB_DB.channels.insert_one({
             'channel_id': self.channel_id,
             'admin_id': self.admin_id,
@@ -32,7 +32,7 @@ class Channel:
                 'media_url': post.media_url
             })
 
-    def update(self):
+    async def update(self):
         MONGODB_DB.channels.update_one(
             {'channel_id': self.channel_id},
             {'$set': {
@@ -53,7 +53,7 @@ class Channel:
             })
 
     @classmethod
-    def get(cls, channel_id):
+    async def get(cls, channel_id):
         channel_data = MONGODB_DB.channels.find_one({'channel_id': channel_id})
         if channel_data:
             channel = cls(
@@ -69,31 +69,31 @@ class Channel:
         return None
 
     @classmethod
-    def delete(cls, channel_id):
+    async def delete(cls, channel_id):
         MONGODB_DB.channels.delete_one({'channel_id': channel_id})
         MONGODB_DB.posts.delete_many({'channel_id': channel_id})
 
-    def add_schedule(self, schedule_minutes):
+    async def add_schedule(self, schedule_minutes):
         if self.schedule_time is None:
             self.schedule_time = []
         self.schedule_time.append(schedule_minutes)
         self.update()
 
-    def remove_schedule(self, schedule_minutes):
+    async def remove_schedule(self, schedule_minutes):
         if self.schedule_time is not None and schedule_minutes in self.schedule_time:
             self.schedule_time.remove(schedule_minutes)
             self.update()
 
-    def get_schedule(self):
+    async def get_schedule(self):
         return self.schedule_time if self.schedule_time is not None else []
 
-    def add_emojis(self, new_emojis):
+    async def add_emojis(self, new_emojis):
         if self.emojis is None:
             self.emojis = []
         self.emojis.extend(new_emojis)
         self.update()
 
-    def remove_emojis(self, emojis_to_remove):
+    async def remove_emojis(self, emojis_to_remove):
         if self.emojis is not None:
             for emoji in emojis_to_remove:
                 if emoji in self.emojis:
