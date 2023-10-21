@@ -4,6 +4,8 @@ from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvali
 from Config import LOGGER
 from postbot import
 
+from postbot import add_channel
+
 
 # Run Bot
 if __name__ == "__main__":
