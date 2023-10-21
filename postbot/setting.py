@@ -1,7 +1,7 @@
 from pyrogram import emoji, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from postbot.database.db_channel import *
-from main import bot
+from postbot import bot
 
 
 @bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
