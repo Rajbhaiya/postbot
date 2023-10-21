@@ -1,15 +1,11 @@
 import asyncio
-import pymongo
 import logging
+from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ServerSelectionTimeoutError
-from motor import motor_asyncio
 from Config import DB_URL
 
-mongodb_client = pymongo.MongoClient(DB_URL, 27017)
-motor = motor_asyncio.AsyncIOMotorClient(DB_URL, 27017)
-db = mongodb_client["postbot"]
+# Create an AsyncIOMotorClient instance
+motor = AsyncIOMotorClient(DB_URL, 27017)
 
-try:
-    asyncio.get_event_loop().run_until_complete(motor.server_info())
-except ServerSelectionTimeoutError:
-    sys.exit(logging.critical("Can't connect to mongodb! Exiting..."))
+# Access the database using the motor client
+db = motor["postbot"]
