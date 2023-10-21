@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
-from main import bot
+from postbot import bot
 from postbot.database.db_channel import *
 from postbot.database.db_users import *
 
@@ -68,3 +68,6 @@ async def add_channel_callback(bot, callback_query):
     # Call the add_channel function
     await add_channel(user_id, channel_id)
     await callback_query.answer("Processing your request...")  # Notify the user that the request is being processed
+
+def register_handlers(bot):
+    bot.add_callback_query_handler(add_channel_)
