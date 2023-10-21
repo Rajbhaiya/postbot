@@ -1,4 +1,4 @@
-from postbot.databse import db
+from postbot.database import db
 MONGODB_DB = db['channels']
 
 class Post:
