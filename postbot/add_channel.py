@@ -8,7 +8,7 @@ from postbot.database.db_users import Users
 
 # Define the add_channel function
 
-async def add_channel(user_id, channel_id):
+async def add_channels(user_id, channel_id):
     try:
         # Check if the bot is an admin in the channel
         bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
@@ -61,18 +61,18 @@ async def add_channel(user_id, channel_id):
 
 # Add this function to your code
 
-@bot.on_callback_query(filters.regex(r'^\\add_channel_$'))
+@bot.on_callback_query(filters.regex(r'^\\add_channel$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     callback_data = callback_query.data
 
     # Check if the callback data follows the correct format
-    if not callback_data.startswith('add_channel_'):
+    if not callback_data.startswith('add_channel'):
         await callback_query.answer("Invalid callback data format.")
         return
 
     # Extract the channel_id
-    channel_id_str = callback_data[len('add_channel_'):]
+    channel_id_str = callback_data[len('add_channel'):]
     
     try:
         channel_id = int(channel_id_str)
@@ -82,5 +82,5 @@ async def add_channel_callback(bot, callback_query: CallbackQuery):
         return
 
     # Call the add_channel function
-    await add_channel(user_id, channel_id)
+    await add_channels(user_id, channel_id)
     await callback_query.answer("Processing your request...")
