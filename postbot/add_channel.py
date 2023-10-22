@@ -21,6 +21,7 @@ async def add_channel_callback(bot, callback_query: CallbackQuery):
         )
 
         if forward_message.forward_from_chat.type == "channel":
+            print(f"Message forwarded from a channel. Chat ID: {forward_message.forward_from_chat.id}")
             # The forwarded message is from a channel
             channel_id = forward_message.forward_from_chat.id
 
