@@ -1,7 +1,9 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Message
-from postbot.database.db_channel import Channel
-from postbot.database.db_reaction import Reaction
+from postbot.database.db_channel import *
+from postbot.database.db_reaction import *
+from postbot.database.db_users import *
+
 from postbot import bot
 
 temp_emojis = {}
