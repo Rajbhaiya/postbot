@@ -73,6 +73,16 @@ class Channel:
         await MONGODB_DB.channels.delete_one({'channel_id': channel_id})
         await MONGODB_DB.posts.delete_many({'channel_id': channel_id})
 
+    async def add_channel(channel_id, user_id):
+        channel = Channel(channel_id, user_id)
+        await channel.save()
+        
+    async def remove_channel(channel_id):
+        channel = await Channel.get(channel_id)
+        if channel:
+            await channel.delete()
+
+
     async def add_schedule(self, schedule_minutes):
         if self.schedule_time is None:
             self.schedule_time = []
