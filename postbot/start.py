@@ -11,7 +11,7 @@ async def start(bot, message:Message):
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("Add Channel", callback_data="add_channel_1"),
+                InlineKeyboardButton("Add Channel", callback_data="add_channel"),
                 InlineKeyboardButton("Manage Channel", callback_data="manage_channels"),
             ],
             [InlineKeyboardButton("Send Post", callback_data="send_post_1")],
