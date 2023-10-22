@@ -36,12 +36,14 @@ async def send_post_media_message(bot, message: Message):
     if (user_id, message.chat.id) not in bot.registered_callbacks:
         return
 
-    # Save the media message as the post
-    text = ""  # You can set a text description if needed
-    user = Users.get(user_id)
+    # Ask the user to send text for the post
+    await message.reply("Please send the text for your post or /skip to post without text.")
+    text_message = await bot.listen(user_id, timeout=300)
+    text = text_message.text if text_message.text else ""
 
+    user = await Users.get(user_id)
     channel_id = message.chat.id
-    channel = Channel.get(channel_id)
+    channel = await Channel.get(channel_id)
 
     # Determine media type and store the media URL as needed
     if message.photo:
@@ -55,14 +57,25 @@ async def send_post_media_message(bot, message: Message):
     else:
         media_url = None
 
-    # Create and save the post
-    if channel and channel_id not in user.channels:
+    if not channel:
+        # Handle the case where the channel doesn't exist
+        await message.reply("The selected channel doesn't exist. Please add the channel first.")
+        return
+
+    if channel_id not in user.channels:
         user.channels.append(channel_id)
         user.save()
+
     post = channel.add_post(text, media_url)
 
-    bot.registered_callbacks.remove((user_id, channel_id))
-    await message.reply("Your post with media has been saved.")
+    # Present the user with options to add emoji and link buttons to the post
+    buttons = [
+        [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{channel_id}")],
+        [InlineKeyboardButton("Add Link Button", callback_data=f"add_link_button_{channel_id}")],
+        [InlineKeyboardButton("Send Post", callback_data=f"send_post_{channel_id}")],
+    ]
+
+    await message.reply("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^send_post_final_\d+$'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
@@ -70,72 +83,83 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[1])
 
     # Collect the data that you've gathered in previous steps
-    # Replace these variables with the actual data you've collected
-    text = "Your post text here"
-    media_url = "Your media URL here"
-    emoji = "Selected emoji here"
-    link_buttons = ["Button 1 - URL 1", "Button 2 - URL 2"]  # Replace with actual buttons
+    text = await bot.get_collection(user_id, "post_text")
+    media_url = await bot.get_collection(user_id, "media_url")
+    emojis = temp_emojis.get(channel_id, [])
+    link_buttons = temp_buttons.get(channel_id, [])
 
-    # Retrieve the stored emojis and buttons for this channel
-    if channel_id in temp_emojis and channel_id in temp_buttons:
-        emojis = temp_emojis[channel_id]
-        link_buttons = temp_buttons[channel_id]
+    # Construct the post message
+    post_message = text
+    if media_url:
+        post_message += f"\n{media_url}"
 
-        # Construct the post message with emojis and buttons
-        post_message = text
-        if media_url:
-            post_message += f"\n{media_url}"
+    # Add emojis to the post
+    if emojis:
+        post_message += "\nEmojis: " + ", ".join(emojis)
 
-        # Add emojis to the post
-        if emoji:
-            post_message += f"\n{emoji}"
+    # Add link buttons to the post
+    if link_buttons:
+        post_message += "\n\nLinks:\n" + "\n".join(link_buttons)
 
-        # Add link buttons to the post
-        if link_buttons:
-            post_message += "\n\nLinks:\n"
-            post_message += "\n".join(link_buttons)
+    try:
+        # Send the post to the selected channel
+        await bot.send_message(channel_id, post_message)
 
-        try:
-            # Send the post to the selected channel
-            # Replace `channel_id` with the actual channel where you want to send the post
-            await bot.send_message(channel_id, post_message)
+        # Clear the temporary data for this channel
+        clear_data(channel_id)
 
-            # Clear the emojis and buttons for this channel
-            clear_data(channel_id)
-
-            await callback_query.answer("Post sent successfully.")
-        except Exception as e:
-            # Handle any exceptions that may occur during the message sending process
-            await callback_query.answer(f"Failed to send the post: {str(e)}")
-    else:
-        await callback_query.answer("No emojis or buttons found for this channel.")
+        await callback_query.answer("Post sent successfully.")
+    except Exception as e:
+        await callback_query.answer(f"Failed to send the post: {str(e)}")
 
 @bot.on_callback_query(filters.regex(r'^send_post_\d$'))
 async def send_post_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[1])
 
-    user = Users.get(user_id)
-    if not user or channel_id not in user.channels:
-        await callback_query.answer("You don't have permission to send posts to this channel.")
+    user = await Users.get(user_id)
+
+    if not user:
+        await callback_query.answer("User not found.")
         return
 
-    # Present the user with options to add emoji and link buttons to the post
+    if not user.channels:
+        await callback_query.answer("You haven't added any channels yet.")
+        return
+
+    # Create a list of buttons for each channel the user has added
     buttons = [
-        [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{channel_id}")],
-        [InlineKeyboardButton("Add Link Button", callback_data=f"add_link_button_{channel_id}")],
-        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{channel_id}")],
+        [
+            InlineKeyboardButton(channel.name, callback_data=f"select_channel_{channel.id}")
+        ] for channel in user.channels
     ]
 
-    await callback_query.edit_message_text("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons))
+    buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
+
+    await callback_query.edit_message_text("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
+
+@bot.on_callback_query(filters.regex(r'^select_channel_\d+$'))
+async def select_channel_callback(bot, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[1])
+
+    # Store the selected channel ID in the user's session
+    await bot.set_collection(user_id, "selected_channel", channel_id)
+
+    # Ask the user to send the media for the post
+    await callback_query.message.reply("Please send the media for the post.")
+
+@bot.on_callback_query(filters.regex(r'^cancel_send_post$'))
+async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
+    # Clear the selected channel and temporary data from the user's session
+    await bot.set_collection(callback_query.from_user.id, "selected_channel", None)
+    await bot.set_collection(callback_query.from_user.id, "post_text", None)
+    await bot.set_collection(callback_query.from_user.id, "media_url", None)
+    await callback_query.message.delete()
                                            
 @bot.on_callback_query(filters.regex(r'^add_emoji_\d+$'))
 async def add_emoji_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
-
-    # Create a list to store emojis
-    emojis = []
 
     # Prompt the user to send emojis and store them temporarily
     await bot.send_message(user_id, "Please send the emojis separated by commas (e.g., 😀, 😂, 😍)")
@@ -149,7 +173,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
         emojis = [emoji.strip() for emoji in emoji_texts]
 
         # Store the emojis temporarily
-        add_emojis(channel_id, emojis)
+        temp_emojis[channel_id] = emojis
 
         # Create a button for each emoji
         emoji_buttons = [
@@ -165,6 +189,9 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
         await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
         await callback_query.answer("Emojis added successfully.")
+
+    else:
+        await callback_query.answer("Emoji selection canceled.")
 
     await callback_query.answer("Emoji selection canceled.")
 @bot.on_callback_query(filters.regex(r'^cancel_emoji_\d+$'))
