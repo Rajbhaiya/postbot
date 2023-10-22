@@ -3,61 +3,70 @@ from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBu
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant
 from pyrogram import Client, filters
 from postbot import bot
-from postbot.database.db_channel import *
-from postbot.database.db_users import Users
+from postbot.database.db_channel import add_channel as cad
+from postbot.database.db_users import add_channel as uad
 
 # Define the add_channel function
 
 @bot.on_callback_query(filters.regex(r'^add_channel$'))
-async def add_channel_callback(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    print("add_channel_callback function triggered")
+async def add_channels(bot: Client, msg):
+    user_id = msg.from_user.id
+    bot_id = bot.me.id
+
     try:
-        # Ask the user to forward a message from the desired channel
-        forward_message = await bot.ask(user_id,
+        channel = await bot.ask(user_id,
             "Please forward a message from the channel you want to add. "
-            "After forwarding, I will check and complete the process.",
+            "After forwarding, I will check and complete the process. "
+            "Cancel this process using /cancel. If there's no reply in 5 minutes, the action will be auto-canceled.",
             timeout=300
         )
 
-        if forward_message.forward_from_chat.type == "channel":
-            print(f"Message forwarded from a channel. Chat ID: {forward_message.forward_from_chat.id}")
-            # The forwarded message is from a channel
-            channel_id = forward_message.forward_from_chat.id
+        while True:
+            if channel.forward_from_chat:
+                if channel.forward_from_chat.type == "ChatType.CHANNEL":
+                    channel_id = channel.forward_from_chat.id
 
-            try:
-                # Check if the bot is an admin in the channel
-                bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
+                    # Check the admin status of the bot in the channel
+                    bot_admin = await check_bot_admin_status(bot, channel_id)
 
-                if bot_chat_member.status == "administrator":
-                    # The bot is an admin in the channel
+                    if bot_admin:
+                        user_admin = await check_user_admin_status(bot, channel_id, user_id)
 
-                    channel_member = await bot.get_chat_member(channel_id, user_id)
-                    if channel_member.status == "administrator":
-                        # The user is an admin in the channel they want to add
+                        if user_admin:
+                            # Check if the user has necessary rights
+                            user_rights = await check_user_rights(bot, channel_id, user_id)
 
-                        # Database Logic - Check if the channel is already in the user's list
-                        user = await Users.get(user_id)
-                        if user:
-                            if channel_id in user.channels:
-                                await forward_message.reply("Channel is already added.")
+                            if user_rights:
+                                # Add the channel to db_channel
+                                await cad(channel_id, user_id)
+
+                                # Add the channel to db_users
+                                await uad(user_id, channel_id)
+
+                                # Continue with further customization
+                                await channel.reply("Thanks for choosing me. Now start managing this channel by customizing settings sent below.", quote=True)
+
+                                # Add other logic for channel customization as needed
+
                             else:
-                                # Channel is not in the user's list, add it
-                                user.add_channel(channel_id)
-                                await forward_message.reply("Channel added successfully!")
+                                text = "You are an admin in the channel, but you don't have the necessary rights ('Post Messages' and 'Edit message of others')."
+                                await channel.reply(text, quote=True)
                         else:
-                            user = Users(user_id)
-                            user.add_channel(channel_id)
-                            await forward_message.reply("Channel added successfully!")
-
-                        # You can also send additional messages or perform other actions here
+                            text = "You are not an admin or owner in the channel you want to add."
+                            await channel.reply(text, quote=True)
                     else:
-                        await forward_message.reply("You are not an admin in the channel you want to add.")
+                        text = "Bot is not an admin in the channel."
+                        await channel.reply(text, quote=True)
+                    break
                 else:
-                    await forward_message.reply("Bot is not an admin in the channel.")
-            except ChatAdminRequired:
-                await forward_message.reply("Bot is not an admin in the channel.")
-        else:
-            await forward_message.reply("Please forward a message from a channel.")
-    except Exception as e:
-        print(f"Error in add_channel_callback: {e}")
+                    text = 'This is not a channel message. Please try forwarding again or /cancel the process.'
+                    channel = await bot.ask(user_id, text, timeout=300, reply_to_message_id=channel.id)
+            else:
+                if channel.text.startswith('/'):
+                    await channel.reply('Cancelled `Add Channel` Process!', quote=True)
+                    break
+                else:
+                    text = 'Please forward a channel message or /cancel the process.'
+                    channel = await bot.ask(user_id, text, timeout=300, reply_to_message_id=channel.id, filters=~filters.me)
+    except asyncio.exceptions.TimeoutError:
+        await msg.reply('Process has been automatically cancelled', quote=True)
