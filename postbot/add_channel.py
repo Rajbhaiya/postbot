@@ -11,6 +11,7 @@ from postbot.database.db_users import Users
 @bot.on_callback_query(filters.regex(r'^add_channel$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
+    print("add_channel_callback function triggered")
     try:
         # Ask the user to forward a message from the desired channel
         forward_message = await bot.ask(user_id,
