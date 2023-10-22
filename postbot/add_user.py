@@ -17,5 +17,5 @@ async def users_mongodb(_, msg: Message):
 
 @Client.on_message(filters.user(OWNER_ID) & filters.command("stats"))
 async def _stats(_, msg: Message):
-     users_count = USERS_MONGODB_DB.count_documents({})
+    users_count = USERS_MONGODB_DB.count_documents({})
     await msg.reply(f"Total Users: {users_count}", quote=True)
