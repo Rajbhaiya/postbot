@@ -118,7 +118,11 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
 async def send_post_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
-    user = await USERS_MONGODB_DB.find_one({"_id": user_id})
+    user_data = await USERS_MONGODB_DB.users.find_one({"_id": user_id})
+    if user_data:
+        user = Users(user_data['_id'], user_data.get('channels', []))  # Use the correct field names
+    else:
+        user = None 
 
     if not user:
         await callback_query.answer("User not found.")
