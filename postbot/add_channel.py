@@ -59,13 +59,3 @@ async def add_channel_callback(bot, callback_query: CallbackQuery):
             await forward_message.reply("Please forward a message from a channel.")
     except Exception as e:
         print(f"Error in add_channels: {e}")
-
-# Add this function to your code
-
-@bot.on_callback_query(filters.regex(r'^add_channel$'))
-async def add_channel_callback(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-
-    # Call the add_channels function
-    await add_channels(user_id)
-    await callback_query.answer("Processing your request...")
