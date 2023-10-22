@@ -8,7 +8,7 @@ from postbot.database.db_users import Users
 
 # Define the add_channel function
 
-async def add_channels(user_id, channel_id):
+async def add_channels(user_id):
     try:
         # Check if the bot is an admin in the channel
         bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
@@ -24,10 +24,10 @@ async def add_channels(user_id, channel_id):
 
             if forward_message.forward_from_chat.type == "channel":
                 # The forwarded message is from a channel
-                channel_to_add_id = forward_message.forward_from_chat.id
+                channel_id = forward_message.forward_from_chat.id
 
                 try:
-                    channel_member = await bot.get_chat_member(channel_to_add_id, user_id)
+                    channel_member = await bot.get_chat_member(channel_id, user_id)
                     if channel_member.status == "administrator":
                         # The user is an admin in the channel they want to add
 
@@ -64,23 +64,7 @@ async def add_channels(user_id, channel_id):
 @bot.on_callback_query(filters.regex(r'^\\add_channel$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    callback_data = callback_query.data
 
-    # Check if the callback data follows the correct format
-    if not callback_data.startswith('add_channel'):
-        await callback_query.answer("Invalid callback data format.")
-        return
-
-    # Extract the channel_id
-    channel_id_str = callback_data[len('add_channel'):]
-    
-    try:
-        channel_id = int(channel_id_str)
-    except ValueError:
-        # Handle the case where channel_id is not a valid integer
-        await callback_query.answer("Invalid channel ID provided.")
-        return
-
-    # Call the add_channel function
-    await add_channels(user_id, channel_id)
+    # Call the add_channels function
+    await add_channels(user_id)
     await callback_query.answer("Processing your request...")
