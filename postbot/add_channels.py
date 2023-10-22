@@ -24,7 +24,7 @@ async def add_channels(bot: Client, msg):
 
         while True:
             if channel.forward_from_chat:
-                if channel.forward_from_chat.type == "ChatType.CHANNEL":
+                if channel.forward_from_chat.type.__str__() == "ChatType.CHANNEL":
                     channel_id = channel.forward_from_chat.id
 
                     # Check the admin status of the bot in the channel
