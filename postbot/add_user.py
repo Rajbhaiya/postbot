@@ -10,13 +10,13 @@ async def users_mongodb(_, msg: Message):
     if msg.from_user:
         user_id = msg.from_user.id
         # Check if the user exists in the database
-        user_data = USERS_MONGODB_DB.find_one({"_id": user_id})
+        user_data = await USERS_MONGODB_DB.find_one({"_id": user_id})
         if not user_data:
             # If the user doesn't exist, insert a new document
-            USERS_MONGODB_DB.insert_one({"_id": user_id})
+            await USERS_MONGODB_DB.insert_one({"_id": user_id})
         # No need to close the session
 
 @bot.on_message(filters.user(OWNER_ID) & filters.command("stats"))
 async def _stats(_, msg: Message):
-    users_count = USERS_MONGODB_DB.count_documents({})
+    users_count = await USERS_MONGODB_DB.count_documents({})
     await msg.reply(f"Total Users: {users_count}", quote=True)
