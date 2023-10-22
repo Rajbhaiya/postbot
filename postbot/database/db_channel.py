@@ -1,4 +1,5 @@
 from postbot.database import db
+from from postbot.database.db_users import Users
 MONGODB_DB = db['channels']
 
 class Post:
@@ -68,20 +69,23 @@ class Channel:
             return channel
         return None
 
-    @classmethod
-    async def delete(cls, channel_id):
+    async def delete(self, channel_id):
         await MONGODB_DB.channels.delete_one({'channel_id': channel_id})
         await MONGODB_DB.posts.delete_many({'channel_id': channel_id})
 
-    async def add_channel(channel_id, user_id):
+    async def add_channel(self, channel_id, user_id):
         channel = Channel(channel_id, user_id)
         await channel.save()
-        
-    async def remove_channel(channel_id):
-        channel = await Channel.get(channel_id)
-        if channel:
-            await channel.delete()
 
+    async def remove_channel(self, channel_id):
+        # Remove the channel from db_channel
+        await MONGODB_DB.channels.delete_one({'channel_id': channel_id})
+
+        # Remove the channel from db_users if it exists
+        user = await Users.get(self.admin_id)
+        if user and channel_id in user.channels:
+            user.channels.remove(channel_id)
+            await user.save()
 
     async def add_schedule(self, schedule_minutes):
         if self.schedule_time is None:
