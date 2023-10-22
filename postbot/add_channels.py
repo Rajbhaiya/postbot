@@ -3,8 +3,8 @@ from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBu
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant
 from pyrogram import Client, filters
 from postbot import bot
-from postbot.database.db_channel import add_channel as cad
-from postbot.database.db_users import add_channel as uad
+from postbot.database.db_channel import Channel as cad
+from postbot.database.db_users import Users as uad
 
 # Define the add_channel function
 
