@@ -1,6 +1,7 @@
 # Import the necessary modules
 from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ChatMember
-from pyrogram.errors import ChatAdminRequired, UserNotParticipant
+from pyrogram.enums import ChatMemberStatus
+from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
 from pyrogram import Client, filters
 from postbot import bot
 from postbot.database.db_channel import Channel as cad
