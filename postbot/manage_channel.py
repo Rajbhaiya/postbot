@@ -44,12 +44,6 @@ async def channel_options_callback(bot, callback_query: CallbackQuery):
 
     await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
-@bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
-async def channel_settings_callback(bot, callback_query: CallbackQuery):
-    # Implement channel settings logic here
-    # You can create additional callback buttons to manage channel settings
-    await callback_query.answer("Channel Settings Menu:")
-
 @bot.on_callback_query(filters.regex(r'^delete_channel_\d+$'))
 async def delete_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
