@@ -3,7 +3,7 @@ from pyrogram import Client, idle
 from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid
 from Config import LOGGER
 
-from postbot import bot, add_channel, manage_channel, send_post, start, setting, add_user
+from postbot import bot, add_channels, manage_channel, send_post, start, setting, add_user
 
 
 
