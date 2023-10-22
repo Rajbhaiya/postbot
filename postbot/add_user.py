@@ -3,8 +3,9 @@ from pyrogram.types import Message
 
 from .database.db_users import Users, USERS_MONGODB_DB
 from Config import OWNER_ID
+from postbot import bot
 
-@Client.on_message(~filters.service, group=1)
+@bot.on_message(~filters.service, group=1)
 async def users_mongodb(_, msg: Message):
     if msg.from_user:
         user_id = msg.from_user.id
@@ -15,7 +16,7 @@ async def users_mongodb(_, msg: Message):
             USERS_MONGODB_DB.insert_one({"_id": user_id})
         # No need to close the session
 
-@Client.on_message(filters.user(OWNER_ID) & filters.command("stats"))
+@bot.on_message(filters.user(OWNER_ID) & filters.command("stats"))
 async def _stats(_, msg: Message):
     users_count = USERS_MONGODB_DB.count_documents({})
     await msg.reply(f"Total Users: {users_count}", quote=True)
