@@ -1,5 +1,5 @@
 from postbot.database import db
-from from postbot.database.db_users import Users
+from postbot.database.db_users import Users
 MONGODB_DB = db['channels']
 
 class Post:
