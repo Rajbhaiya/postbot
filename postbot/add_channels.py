@@ -5,7 +5,7 @@ from pyrogram.enums import ChatMemberStatus
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
 from pyrogram import Client, filters
 from postbot import bot
-from postbot.database.db_channel import add_channel as cac, remove_channel, get_channel_info
+from postbot.database.db_channel import remove_channel, get_channel_info
 from postbot.database.db_users import  add_channel as uac, remove_channel
 
 @bot.on_callback_query(filters.regex(r'^add_channel$'))
