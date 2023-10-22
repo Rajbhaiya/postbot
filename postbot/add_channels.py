@@ -1,6 +1,6 @@
 # Import the necessary modules
 import asyncio.exceptions
-from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ChatMember
+from pyrogram.types import CallbackQuery, ChatMember, InputChatPhotoEmpty
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
 from pyrogram import Client, filters
@@ -8,7 +8,19 @@ from postbot import bot
 from postbot.database.db_channel import Channel as cad
 from postbot.database.db_users import Users as uad
 
-# Define the add_channel function
+async def check_bot_admin_status(bot: Client, channel_id):
+    try:
+        bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
+        return bot_chat_member.status == "administrator"
+    except:
+        return False
+
+async def check_user_admin_status(bot: Client, channel_id, user_id):
+    try:
+        user_chat_member = await bot.get_chat_member(channel_id, user_id)
+        return user_chat_member.status == "administrator" or user_chat_member.status == "creator"
+    except:
+        return False
 
 @bot.on_callback_query(filters.regex(r'^add_channel$'))
 async def add_channels(bot: Client, msg):
