@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from .add_channel import *
+from .add_channels import *
 from .manage_channel import *
 from .send_post import *
 from postbot import bot
