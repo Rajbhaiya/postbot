@@ -5,7 +5,7 @@ USERS_MONGODB_DB = db['users']
 class Users:
     def __init__(self, user_id, channels=None):
         self.user_id = user_id
-        self.channels = channels
+        self.channels = channels if channels is not None else []
 
     async def save(self):
         await USERS_MONGODB_DB.users.insert_one({
