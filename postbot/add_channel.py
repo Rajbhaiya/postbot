@@ -1,5 +1,5 @@
 # Import the necessary modules
-from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ChatMember
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant
 from pyrogram import filters
 from postbot import bot
@@ -10,23 +10,24 @@ from postbot.database.db_users import Users
 
 async def add_channels(user_id):
     try:
-        # Check if the bot is an admin in the channel
-        bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
+        # Ask the user to forward a message from the desired channel
+        forward_message = await bot.ask(user_id,
+            "Please forward a message from the channel you want to add. "
+            "After forwarding, I will check and complete the process.",
+            timeout=300
+        )
 
-        if bot_chat_member.status == "administrator":
-            # Ask the user to forward a message from the desired channel
-            forward_message = await bot.ask(user_id,
-                "Please forward a message from the channel you want to add. "
-                "After forwarding, I will check and complete the process. "
-                "You can also cancel this process using /cancel.",
-                timeout=300
-            )
+        if forward_message.forward_from_chat.type == "channel":
+            # The forwarded message is from a channel
+            channel_id = forward_message.forward_from_chat.id
 
-            if forward_message.forward_from_chat.type == "channel":
-                # The forwarded message is from a channel
-                channel_id = forward_message.forward_from_chat.id
+            try:
+                # Check if the bot is an admin in the channel
+                bot_chat_member = await bot.get_chat_member(channel_id, bot.me.id)
 
-                try:
+                if bot_chat_member.status == "administrator":
+                    # The bot is an admin in the channel
+
                     channel_member = await bot.get_chat_member(channel_id, user_id)
                     if channel_member.status == "administrator":
                         # The user is an admin in the channel they want to add
@@ -48,20 +49,18 @@ async def add_channels(user_id):
                         # You can also send additional messages or perform other actions here
                     else:
                         await forward_message.reply("You are not an admin in the channel you want to add.")
-                except UserNotParticipant:
-                    await forward_message.reply("You are not a member of the channel you want to add.")
-                except ChatAdminRequired:
+                else:
                     await forward_message.reply("Bot is not an admin in the channel.")
-            else:
-                await forward_message.reply("Please forward a message from a channel.")
+            except ChatAdminRequired:
+                await forward_message.reply("Bot is not an admin in the channel.")
         else:
-            await forward_message.reply("Bot is not an admin in the channel.")
-    except ChatAdminRequired:
-        await forward_message.reply("Bot is not an admin in the channel.")
+            await forward_message.reply("Please forward a message from a channel.")
+    except Exception as e:
+        print(f"Error in add_channels: {e}")
 
 # Add this function to your code
 
-@bot.on_callback_query(filters.regex(r'^\\add_channel$'))
+@bot.on_callback_query(filters.regex(r'^add_channel$'))
 async def add_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
