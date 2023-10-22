@@ -1,6 +1,6 @@
 # Import the necessary modules
 import asyncio.exceptions
-from pyrogram.types import CallbackQuery, ChatMember, InputChatPhotoEmpty
+from pyrogram.types import CallbackQuery, ChatMember
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChannelPrivate
 from pyrogram import Client, filters
