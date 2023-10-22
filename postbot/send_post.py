@@ -43,9 +43,9 @@ async def send_post_media_message(bot, message: Message):
     text_message = await bot.listen(user_id, timeout=300)
     text = text_message.text if text_message.text else ""
 
-    user = await Users.get(user_id)
+    user = await USERS_MONGODB_DB.find_one({"_id": user_id})
     channel_id = message.chat.id
-    channel = await Channel.get(channel_id)
+    channel = await MONGODB_DB.find_one({"channel_id": channel_id})
 
     # Determine media type and store the media URL as needed
     if message.photo:
@@ -118,7 +118,7 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
 async def send_post_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
-    user = await Users.get(user_id)
+    user = await USERS_MONGODB_DB.find_one({"_id": user_id})
 
     if not user:
         await callback_query.answer("User not found.")
