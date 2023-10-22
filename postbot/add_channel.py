@@ -58,4 +58,4 @@ async def add_channel_callback(bot, callback_query: CallbackQuery):
         else:
             await forward_message.reply("Please forward a message from a channel.")
     except Exception as e:
-        print(f"Error in add_channels: {e}")
+        print(f"Error in add_channel_callback: {e}")
