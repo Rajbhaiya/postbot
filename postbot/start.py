@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from .add_channel import add_channel_callback
+from .add_channel import *
 from .manage_channel import *
 from .send_post import *
 from postbot import bot
@@ -11,7 +11,7 @@ async def start(bot, message:Message):
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("Add Channel", callback_data="add_channel_1"),
+                InlineKeyboardButton("Add Channel", callback_data="add_channel"),
                 InlineKeyboardButton("Manage Channel", callback_data="manage_channels"),
             ],
             [InlineKeyboardButton("Send Post", callback_data="send_post_1")],
