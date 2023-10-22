@@ -9,6 +9,7 @@ from postbot.database.db_channel import add_channel as cac, remove_channel, get_
 from postbot.database.db_users import  add_channel as uac, remove_channel
 
 @bot.on_callback_query(filters.regex(r'^add_channel$'))
+async def add_channels(bot: Client, msg):
     user_id = msg.from_user.id
     bot_id = bot.me.id
     try:
