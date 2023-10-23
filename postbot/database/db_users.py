@@ -54,5 +54,5 @@ async def get_channels(user_id):
     return user['channels'] if user else []
 
 async def users_count():
-    # Calculate and return the number of users
-    return await USERS_DB.users.count_documents({})
+    user_count = await USERS_DB.users.count_documents({})
+    return user_count
