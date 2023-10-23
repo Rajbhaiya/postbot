@@ -6,7 +6,7 @@ from .send_post import *
 from postbot import bot
 
 @bot.on_message(filters.private & filters.command("start"))
-async def start_command(bot, message):
+async def start_command(bot, message: Message):
     # Define the keyboard with three buttons
     keyboard = InlineKeyboardMarkup(
         [
