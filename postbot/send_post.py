@@ -116,7 +116,7 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer(f"Failed to send the post: {str(e)}")
 
 @bot.on_callback_query(filters.regex(r'^send_post$'))
-async def send_post_start(bot, message: Message):
+async def send_post(bot, message: Message):
     user_id = message.from_user.id
 
     user_channels = await get_channels(user_id)
