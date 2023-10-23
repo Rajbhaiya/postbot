@@ -13,12 +13,12 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
 
     # Get the user's channels
     user = await get_user(user_id)
-    if not user or not user.channel:
+    if not user or not user['channels']:  # Fix: Access 'channels' as a dictionary key
         await callback_query.answer("No channels found in your list.")
         return
 
     buttons = []
-    for channel_id in users.channel:
+    for channel_id in user['channels']:  # Fix: Access 'channels' as a dictionary key
         try:
             chat = await bot.get_chat(channel_id)
             # Add a button for each channel
@@ -50,8 +50,8 @@ async def delete_channel_callback(bot, callback_query: CallbackQuery):
 
     # Remove the channel from the user's database
     user = await get_user(user_id)
-    if user and users.channel and channel_id in users.channel:
-        await users.remove_channel(user_id, channel_id)
+    if user and user['channels'] and channel_id in user['channels']:  # Fix: Access 'channels' as a dictionary key
+        await remove_channel(user_id, channel_id)  # Fix: Call the 'remove_channel' function
 
     # Notify the user
     await callback_query.answer("Channel deleted successfully.")
