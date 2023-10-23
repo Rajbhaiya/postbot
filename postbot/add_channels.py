@@ -27,7 +27,7 @@ async def add_channels(bot: Client, msg):
                         if chat_member.privileges.can_post_messages and chat_member.privileges.can_edit_messages:
                             # Don't allow non-admins.
                             if chat_member_user.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-                                success, info = await get_channel_info(channel_id)
+                                success, info = get_channel_info(channel_id)
                                 if success:
                                     try:
                                         admin_chat_member = await bot.get_chat_member(channel_id, info['admin_id'])
