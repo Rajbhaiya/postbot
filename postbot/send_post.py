@@ -123,9 +123,9 @@ async def send_post_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer("User not found.")
         return
 
-    user_channel = await get_channel(user_id)
+    user_channel = await get_channels(user_id)
 
-    if not user.channel:
+    if not user_channel:
         await callback_query.answer("You haven't added any channels yet.")
         return
 
