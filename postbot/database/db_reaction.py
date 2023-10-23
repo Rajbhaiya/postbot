@@ -31,15 +31,5 @@ async def save_reaction(channel_id, post_id, emoji, count):
         'emoji': emoji,
         'count': count
     }
-
-                    
-async def delete_reaction(channel_id, post_id, emoji):
-    # Delete the reaction for the specified channel, post, and emoji
-    await MONGODB_DB.reactions.delete_one({
-        'channel_id': channel_id,
-        'post_id': post_id,
-        'emoji': emoji
-    }
-
                 
                                         
