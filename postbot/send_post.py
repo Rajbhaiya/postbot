@@ -114,21 +114,18 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
     except Exception as e:
         await callback_query.answer(f"Failed to send the post: {str(e)}")
 
-@bot.on_callback_query(filters.regex(r'^send_post_\d$'))
+@bot.on_callback_query(filters.regex(r'^send_post$'))
 async def send_post_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
-    user_data = await USERS_MONGODB_DB.users.find_one({"_id": user_id})
-    if user_data:
-        user = Users(user_data['_id'], user_data.get('channels', []))  # Use the correct field names
-    else:
-        user = None 
-
+    user = await get_user(user_id)
     if not user:
         await callback_query.answer("User not found.")
         return
 
-    if not user.channels:
+    user_channel = await get_channel(user_id)
+
+    if not user.channel:
         await callback_query.answer("You haven't added any channels yet.")
         return
 
@@ -136,7 +133,7 @@ async def send_post_callback(bot, callback_query: CallbackQuery):
     buttons = [
         [
             InlineKeyboardButton(channel.name, callback_data=f"select_channel_{channel.id}")
-        ] for channel in user.channels
+        ] for channel in users.channels
     ]
 
     buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
