@@ -1,137 +1,84 @@
 from postbot.database import db
 from postbot.database.db_users import Users
-MONGODB_DB = db['channels']
 
-class Post:
-    def __init__(self, text, media_url):
-        self.text = text
-        self.media_url = media_url
+CHANNEL_DB = db['channels']
 
-class Channel:
-    def __init__(self, channel_id, admin_id, sticker_id=None, emojis=None, schedule_time=None, posts=None):
-        self.channel_id = channel_id
-        self.admin_id = admin_id
-        self.sticker_id = sticker_id
-        self.emojis = emojis if emojis is not None else []
-        self.schedule_time = schedule_time
-        self.posts = posts if posts is not None else []
+def create_post(text, media_url):
+    return {
+        'text': text,
+        'media_url': media_url
+    }
 
-    async def save(self):
-        await MONGODB_DB.channels.insert_one({
-            'channel_id': self.channel_id,
-            'admin_id': self.admin_id,
-            'sticker_id': self.sticker_id,
-            'emojis': self.emojis,
-            'schedule_time': self.schedule_time
-        })
+def create_channel(channel_id, user_id, sticker_id=None, emojis=None, schedule_time=None, posts=None):
+    return {
+        'channel_id': channel_id,
+        'user_id': user_id,  # Changed from admin_id to user_id
+        'sticker_id': sticker_id,
+        'emojis': emojis if emojis is not None else [],
+        'schedule_time': schedule_time,
+        'posts': posts if posts is not None else []
+    }
 
-        # Save associated posts
-        for post in self.posts:
-            await MONGODB_DB.posts.insert_one({
-                'channel_id': self.channel_id,
-                'text': post.text,
-                'media_url': post.media_url
-            })
+def save_channel(channel_data):
+    CHANNEL_DB.channels.insert_one(channel_data)
 
-    async def update(self):
-        await MONGODB_DB.channels.update_one(
-            {'channel_id': self.channel_id},
-            {'$set': {
-                'admin_id': self.admin_id,
-                'sticker_id': self.sticker_id,
-                'emojis': self.emojis,
-                'schedule_time': self.schedule_time
-            }}
-        )
+def update_channel(channel_id, channel_data):
+    CHANNEL_DB.channels.update_one({'channel_id': channel_id}, {'$set': channel_data})
 
-        # Update associated posts
-        await MONGODB_DB.posts.delete_many({'channel_id': self.channel_id})
-        for post in self.posts:
-            await MONGODB_DB.posts.insert_one({
-                'channel_id': self.channel_id,
-                'text': post.text,
-                'media_url': post.media_url
-            })
+def delete_channel(channel_id):
+    CHANNEL_DB.channels.delete_one({'channel_id': channel_id})
+    CHANNEL_DB.posts.delete_many({'channel_id': channel_id})
 
-    @classmethod
-    async def get(cls, channel_id):
-        channel_data = await MONGODB_DB.channels.find_one({'channel_id': channel_id})
-        if channel_data:
-            channel = cls(
-                channel_data['channel_id'],
-                channel_data['admin_id'],
-                channel_data['sticker_id'],
-                channel_data['emojis'],
-                channel_data['schedule_time']
-            )
-            post_data = await MONGODB_DB.posts.find({'channel_id': channel_id})
-            channel.posts = [Post(post['text'], post['media_url']) async for post in post_data]
-            return channel
-        return None
+def add_channel(channel_id, user_id):
+    channel_data = create_channel(channel_id, user_id)
+    save_channel(channel_data)
 
-    async def delete(self, channel_id):
-        await MONGODB_DB.channels.delete_one({'channel_id': channel_id})
-        await MONGODB_DB.posts.delete_many({'channel_id': channel_id})
+def remove_channel(channel_id, user_id):
+    CHANNEL_DB.channels.delete_one({'channel_id': channel_id})
 
-    async def add_channel(self, channel_id, user_id):
-        channel = Channel(channel_id, user_id)
-        await channel.save()
+def add_schedule(channel_data, schedule_minutes):
+    if channel_data['schedule_time'] is None:
+        channel_data['schedule_time'] = []
+    channel_data['schedule_time'].append(schedule_minutes)
+    update_channel(channel_data['channel_id'], channel_data)
 
-    async def remove_channel(self, channel_id):
-        # Remove the channel from db_channel
-        await MONGODB_DB.channels.delete_one({'channel_id': channel_id})
+def remove_schedule(channel_data, schedule_minutes):
+    if channel_data['schedule_time'] is not None and schedule_minutes in channel_data['schedule_time']:
+        channel_data['schedule_time'].remove(schedule_minutes)
+        update_channel(channel_data['channel_id'], channel_data)
 
-        # Remove the channel from db_users if it exists
-        user = await Users.get(self.admin_id)
-        if user and channel_id in user.channels:
-            user.channels.remove(channel_id)
-            await user.save()
+def get_schedule(channel_data):
+    return channel_data['schedule_time'] if channel_data['schedule_time'] is not None else []
 
-    async def add_schedule(self, schedule_minutes):
-        if self.schedule_time is None:
-            self.schedule_time = []
-        self.schedule_time.append(schedule_minutes)
-        await self.update()
+def add_emojis(channel_data, new_emojis):
+    if channel_data['emojis'] is None:
+        channel_data['emojis'] = []
+    channel_data['emojis'].extend(new_emojis)
+    update_channel(channel_data['channel_id'], channel_data)
 
-    async def remove_schedule(self, schedule_minutes):
-        if self.schedule_time is not None and schedule_minutes in self.schedule_time:
-            self.schedule_time.remove(schedule_minutes)
-            await self.update()
+def remove_emojis(channel_data, emojis_to_remove):
+    if channel_data['emojis'] is not None:
+        for emoji in emojis_to_remove:
+            if emoji in channel_data['emojis']:
+                channel_data['emojis'].remove(emoji)
+    update_channel(channel_data['channel_id'], channel_data)
 
-    async def get_schedule(self):
-        return self.schedule_time if self.schedule_time is not None else []
+def get_emojis(channel_data):
+    return channel_data['emojis'] if channel_data['emojis'] is not None else []
 
-    async def add_emojis(self, new_emojis):
-        if self.emojis is None:
-            self.emojis = []
-        self.emojis.extend(new_emojis)
-        await self.update()
+def set_sticker(channel_data, sticker_id):
+    channel_data['sticker_id'] = sticker_id
+    update_channel(channel_data['channel_id'], channel_data)
 
-    async def remove_emojis(self, emojis_to_remove):
-        if self.emojis is not None:
-            for emoji in emojis_to_remove:
-                if emoji in self.emojis:
-                    self.emojis.remove(emoji)
-        await self.update()
+def remove_sticker(channel_data):
+    channel_data['sticker_id'] = None
+    update_channel(channel_data['channel_id'], channel_data)
 
-    async def get_emojis(self):
-        return self.emojis if self.emojis is not None else []
+def get_sticker(channel_data):
+    return channel_data['sticker_id']
 
-    async def set_sticker(self, sticker_id):
-        self.sticker_id = sticker_id
-        await self.update()
-
-    async def get_sticker(self):
-        return self.sticker_id
-
-    @classmethod
-    async def get_channel_info(cls, channel_id):
-        channel_data = await MONGODB_DB.channels.find_one({'channel_id': channel_id})
-        if channel_data:
-            return True, {
-                'channel_id': channel_data['channel_id'],
-                'admin_id': channel_data['admin_id'],
-                'sticker_id': channel_data['sticker_id'],
-                'emojis': channel_data['emojis']
-            }
-        return False, {}
+def get_channel_info(channel_id):
+    channel_data = CHANNEL_DB.channels.find_one({'channel_id': channel_id})
+    if channel_data:
+        return True, channel_data
+    return False, {}
