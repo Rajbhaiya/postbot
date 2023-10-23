@@ -41,18 +41,33 @@ def clear_data(channel_id):
     delete_emojis(channel_id)
     delete_buttons(channel_id)
 
+selected_channel = {}
+
+@bot.on_callback_query(filters.regex(r'^select_channel_\d+$'))
+async def select_channel_callback(bot, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[1])
+
+    # Store the selected channel ID in the dictionary
+    selected_channel[user_id] = channel_id
+
+    await callback_query.message.reply("Please send the text for your post or /skip to post without text.")
 
 @bot.on_message(filters.private)
 async def send_post_text_or_media(bot, message: Message):
     user_id = message.from_user.id
-    user_channel = await bot.get_collection(user_id, "selected_channel")
+
+    # Retrieve the selected channel from the dictionary
+    user_channel = selected_channel.get(user_id)
 
     if not user_channel:
         return
 
     user_input = message.text if message.text else ""
 
-    await bot.delete_collection(user_id, "selected_channel")
+    # Remove the selected channel from the dictionary
+    if user_id in selected_channel:
+        del selected_channel[user_id]
 
     # Create a list of buttons for emojis and links
     buttons = [
@@ -118,15 +133,6 @@ async def send_post_start(bot, message: Message):
     buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
 
     await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
-
-@bot.on_callback_query(filters.regex(r'^select_channel_\d+$'))
-async def select_channel_callback(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[1])
-
-    await bot.set_collection(user_id, "selected_channel", channel_id)
-
-    await callback_query.message.reply("Please send the text for your post or /skip to post without text.")
 
 @bot.on_callback_query(filters.regex(r'^cancel_send_post$'))
 async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
