@@ -1,5 +1,6 @@
 from postbot.database import db
 from postbot.database.db_users import *
+from typing import List, Dict
 
 CHANNEL_DB = db['channels']
 
@@ -19,11 +20,17 @@ def create_channel(channel_id, user_id, sticker_id=None, emojis=None, schedule_t
         'posts': posts if posts is not None else []
     }
 
-def save_channel(channel_data):
-    CHANNEL_DB.channels.insert_one(channel_data)
+def save_channel(channel_data: dict):
+    try:
+        CHANNEL_DB.channels.insert_one(channel_data)
+    except Exception as e:
+        raise CustomDatabaseError(f"Failed to save channel: {e}")
 
-def update_channel(channel_id, channel_data):
-    CHANNEL_DB.channels.update_one({'channel_id': channel_id}, {'$set': channel_data})
+def update_channel(channel_id: str, channel_data: dict):
+    try:
+        CHANNEL_DB.channels.update_one({'channel_id': channel_id}, {'$set': channel_data}, upsert=True)
+    except Exception as e:
+        raise CustomDatabaseError(f"Failed to update channel: {e}")
 
 def delete_channel(channel_id):
     CHANNEL_DB.channels.delete_one({'channel_id': channel_id})
@@ -87,3 +94,6 @@ def get_channel_info(channel_id):
     if channel_data:
         return True, channel_data
     return False, {}
+
+class CustomDatabaseError(Exception):
+    pass
