@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
-from .database.db_users import save_user, USERS_DB, get_user
+from .database.db_users import save_user, get_user, users_count
 from Config import OWNER_ID
 from postbot import bot
 
@@ -15,5 +15,4 @@ async def users_mongodb(_, msg: Message):
 
 @bot.on_message(filters.user(OWNER_ID) & filters.command("stats"))
 async def _stats(_, msg: Message):
-    users_count = await USERS_DB.user.count_documents({})
     await msg.reply(f"Total Users: {users_count}", quote=True)
