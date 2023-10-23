@@ -13,7 +13,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
 
     # Get the user's channels
     user = await get_user(user_id)
-    if not user or not users.channel:
+    if not user or not user.channel:
         await callback_query.answer("No channels found in your list.")
         return
 
