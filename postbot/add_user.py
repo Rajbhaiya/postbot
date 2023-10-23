@@ -10,7 +10,7 @@ async def users_mongodb(_, msg: Message):
     if msg.from_user:
         user_id = msg.from_user.id
         find_user = await get_user(user_id)
-        if not find_data:
+        if not find_user:
             await save_user(user_id)
 
 @bot.on_message(filters.user(OWNER_ID) & filters.command("stats"))
