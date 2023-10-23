@@ -1,5 +1,5 @@
 from postbot.database import db
-from postbot.database.db_users import Users
+from postbot.database.db_users import *
 
 CHANNEL_DB = db['channels']
 
@@ -34,7 +34,12 @@ def add_channel(channel_id, user_id):
     save_channel(channel_data)
 
 def remove_channel(channel_id, user_id):
+    # First, remove the channel entry from the CHANNEL_DB
     CHANNEL_DB.channels.delete_one({'channel_id': channel_id})
+    user_data = get_user(user_id)
+    if user_data and 'channels' in user_data and channel_id in user_data['channels']:
+        user_data['channels'].remove(channel_id)
+        update_user(user_id, user_data)
 
 def add_schedule(channel_data, schedule_minutes):
     if channel_data['schedule_time'] is None:
