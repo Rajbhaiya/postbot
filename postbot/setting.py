@@ -7,11 +7,15 @@ from postbot import bot
 @bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
 async def channel_settings_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[2])
-    text = f'**{title}** (`{channel_id}'
+
+    # Fetch the channel information from the Telegram API
+    chat = await bot.get_chat(channel_id)
+    channel_title = chat.title
+
     text, markup, sticker_id = await get_channel_info(channel_id)
 
     if text:
-        await callback_query.message.edit_text(text, reply_markup=InlineKeyboardMarkup(markup), quote=True)
+        await callback_query.message.edit_text(f"**{channel_title}** (`{channel_id}`)\n{text}", reply_markup=InlineKeyboardMarkup(markup), quote=True)
     else:
         await callback_query.message.delete()
 
