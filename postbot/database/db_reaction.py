@@ -18,7 +18,6 @@ async def update_reaction(channel_id, post_id, emoji, new_count):
         {'channel_id': channel_id, 'post_id': post_id, 'emoji': emoji},
         {'$set': {'count': new_count}}
     )
-
 async def get_reaction(channel_id, post_id, emoji):
     # Retrieve the reaction data for the specified channel, post, and emoji
     reaction_data = await MONGODB_DB.reactions.find_one({
