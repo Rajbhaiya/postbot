@@ -42,39 +42,28 @@ def clear_data(channel_id):
     delete_buttons(channel_id)
 
 
-@bot.on_message((filters.document | filters.video | filters.audio | filters.photo) & filters.incoming & filters.private)
-async def send_post_media_message(bot, message: Message):
+@bot.on_message(filters.private)
+async def send_post_text_or_media(bot, message: Message):
     user_id = message.from_user.id
+    user_channel = await bot.get_collection(user_id, "selected_channel")
 
-    if (user_id, message.chat.id) not in bot.registered_callbacks:
+    if not user_channel:
         return
 
-    # Ask the user to send text for the post
-    await message.reply("Please send the text for your post or /skip to post without text.")
-    text_message = await bot.listen(user_id, timeout=300)
-    text = text_message.text if text_message.text else ""
+    user_input = message.text if message.text else ""
 
-    user = await get_user(user_id)
-    if not user:
-        await callback_query.answer("User not found.")
-        return
+    await bot.delete_collection(user_id, "selected_channel")
 
-    user_channels = await get_channels(user_id)
-
-    if not user_channels:
-        await callback_query.answer("You haven't added any channels yet.")
-        return
-
-    # Create a list of buttons for each channel the user has added
+    # Create a list of buttons for emojis and links
     buttons = [
-        [
-            InlineKeyboardButton(channel.name, callback_data=f"select_channel_{channel.id}")
-        ] for channel in user_channels
+        [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}"),
+         InlineKeyboardButton("Add Link Button", callback_data=f"add_link_button_{user_channel}")],
+        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
+        [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
     ]
 
-    buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
+    await message.reply(f"Your post content:\n\n{user_input}", reply_markup=InlineKeyboardMarkup(buttons))
 
-    await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^send_post_final_\d+$'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
@@ -112,41 +101,32 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer(f"Failed to send the post: {str(e)}")
 
 @bot.on_callback_query(filters.regex(r'^send_post$'))
-async def send_post_callback(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
+async def send_post_start(bot, message: Message):
+    user_id = message.from_user.id
 
-    user = await get_user(user_id)
-    if not user:
-        await callback_query.answer("User not found.")
+    user_channels = await get_channels(user_id)
+
+    if not user_channels:
+        await message.reply("You haven't added any channels yet.")
         return
 
-    user_channel = await get_channels(user_id)
-
-    if not user_channel:
-        await callback_query.answer("You haven't added any channels yet.")
-        return
-
-    # Create a list of buttons for each channel the user has added
-    buttons = [
-        [
-            InlineKeyboardButton(channel.name, callback_data=f"select_channel_{channel.id}")
-        ] for channel in users.channels
-    ]
+    buttons = []
+    for channel in user_channels:
+        channel_name = (await bot.get_chat(channel_id)).title
+        buttons.append([InlineKeyboardButton(channel_name, callback_data=f"select_channel_{channel.id}")])
 
     buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
 
-    await callback_query.edit_message_text("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
+    await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^select_channel_\d+$'))
 async def select_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[1])
 
-    # Store the selected channel ID in the user's session
     await bot.set_collection(user_id, "selected_channel", channel_id)
 
-    # Ask the user to send the media for the post
-    await callback_query.message.reply("Please send the media for the post.")
+    await callback_query.message.reply("Please send the text for your post or /skip to post without text.")
 
 @bot.on_callback_query(filters.regex(r'^cancel_send_post$'))
 async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
