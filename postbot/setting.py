@@ -7,8 +7,8 @@ from postbot import bot
 @bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
 async def channel_settings_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[2])
-
-    text, markup, sticker_id = await channel_settings(channel_id, bot)
+    text = f'**{title}** (`{channel_id}
+    text, markup, sticker_id = await get_channel_info(channel_id)
 
     if text:
         await callback_query.message.edit_text(text, reply_markup=InlineKeyboardMarkup(markup), quote=True)
