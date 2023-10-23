@@ -3,8 +3,19 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from postbot.database.db_channel import *
 from postbot.database.db_reaction import *
 from postbot.database.db_users import *
+import uuid
+import time
 
 from postbot import bot
+
+def generate_unique_post_id():
+    # Use a timestamp to ensure uniqueness
+    timestamp = int(time.time() * 1000)  # Convert to milliseconds
+    # Generate a random UUID (Universally Unique Identifier)
+    unique_id = str(uuid.uuid4())
+    # Combine timestamp and unique_id to create a unique post_id
+    post_id = f"{timestamp}_{unique_id}"
+    return post_id
 
 temp_emojis = {}
 temp_buttons = {}
@@ -43,41 +54,27 @@ async def send_post_media_message(bot, message: Message):
     text_message = await bot.listen(user_id, timeout=300)
     text = text_message.text if text_message.text else ""
 
-    user = await USERS_MONGODB_DB.find_one({"_id": user_id})
-    channel_id = message.chat.id
-    channel = await MONGODB_DB.find_one({"channel_id": channel_id})
-
-    # Determine media type and store the media URL as needed
-    if message.photo:
-        media_url = message.photo.file_id
-    elif message.document:
-        media_url = message.document.file_id
-    elif message.video:
-        media_url = message.video.file_id
-    elif message.audio:
-        media_url = message.audio.file_id
-    else:
-        media_url = None
-
-    if not channel:
-        # Handle the case where the channel doesn't exist
-        await message.reply("The selected channel doesn't exist. Please add the channel first.")
+    user = await get_user(user_id)
+    if not user:
+        await callback_query.answer("User not found.")
         return
 
-    if channel_id not in user.channels:
-        user.channels.append(channel_id)
-        user.save()
+    user_channels = await get_channels(user_id)
 
-    post = channel.add_post(text, media_url)
+    if not user_channels:
+        await callback_query.answer("You haven't added any channels yet.")
+        return
 
-    # Present the user with options to add emoji and link buttons to the post
+    # Create a list of buttons for each channel the user has added
     buttons = [
-        [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{channel_id}")],
-        [InlineKeyboardButton("Add Link Button", callback_data=f"add_link_button_{channel_id}")],
-        [InlineKeyboardButton("Send Post", callback_data=f"send_post_{channel_id}")],
+        [
+            InlineKeyboardButton(channel.name, callback_data=f"select_channel_{channel.id}")
+        ] for channel in user_channels
     ]
 
-    await message.reply("Options for your post:", reply_markup=InlineKeyboardMarkup(buttons))
+    buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
+
+    await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^send_post_final_\d+$'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
@@ -208,16 +205,39 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
 
     await callback_query.answer("Emoji selection canceled.")
 
+reactions = {}
+
+# Callback function to handle adding reactions
 @bot.on_callback_query(filters.regex(r'^react_\d+_.+$'))
 async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id, emoji = callback_query.data.split('_')[1:]
 
-    # Create an instance of the Reaction class for the specific channel and emoji
-    reaction = Reaction(channel_id, emoji)
+    # Define a unique identifier for the post (e.g., post_id)
+    post_id = generate_unique_post_id()
+    post = channel.add_post(text, media_url)
+    post.unique_id = post_id  # Store the unique post_id
 
-    # Use the Reaction class to add the user's reaction
-    reaction.add_reaction(user_id)
+    # Check if the post is in the reactions dictionary
+    if (channel_id, post_id) in reactions:
+        post_reactions = reactions[(channel_id, post_id)]
+    else:
+        post_reactions = {}
+
+    # Check if the emoji has already been reacted by the user
+    if user_id in post_reactions:
+        await callback_query.answer("You've already reacted with this emoji.")
+        return
+
+    # Add the user's reaction to the post_reactions dictionary
+    post_reactions[user_id] = emoji
+    reactions[(channel_id, post_id)] = post_reactions
+
+    # You can store the reactions in your database or process them as needed
+    # For example, let's say you have a Post and Reaction model:
+    # You can create a Reaction object and link it to the corresponding post.
+    reaction = Reaction(post_id, user_id, emoji)
+    await reaction.save()  # Save the reaction in your database
 
     await callback_query.answer(f"You reacted with {emoji}")
 
