@@ -12,7 +12,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
     # Get the user's channels
-    user = await Users.get(user_id)
+    user = await get_user(user_id)
     if not user or not user.channels:
         await callback_query.answer("No channels found in your list.")
         return
@@ -49,10 +49,9 @@ async def delete_channel_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[2])
 
     # Remove the channel from the user's database
-    user = Users.get(user_id)
-    if user and user.channels and channel_id in user.channels:
-        user.channels.remove(channel_id)
-        user.save()
+    user = await get_user(user_id)
+    if user and users.channels and channel_id in users.channels:
+        await users.remove_channel(user_id, channel_id)
 
     # Notify the user
     await callback_query.answer("Channel deleted successfully.")
