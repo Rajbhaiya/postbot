@@ -5,7 +5,7 @@ from .manage_channel import *
 from .send_post import *
 from postbot import bot
 
-@bot.on_message(filters.private & filters.command("start"))
+@bot.on_message((filters.regex(r'^start$') | filters.command('start')) & filters.private)
 async def start_command(bot, message: Message):
     # Define the keyboard with three buttons
     keyboard = InlineKeyboardMarkup(
