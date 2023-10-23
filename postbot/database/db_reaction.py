@@ -2,16 +2,6 @@
 
 from postbot.database import db
 MONGODB_DB = db['reactions']
-
-async def save_reaction(channel_id, post_id, emoji, count):
-    await MONGODB_DB.reactions.insert_one({
-        'channel_id': channel_id,
-        'post_id': post_id,
-        'emoji': emoji,
-        'count': count
-    }
-
-                    
     
 async def get_reaction(channel_id, post_id, emoji):
     reaction_data = await MONGODB_DB.reactions.find_one({
@@ -42,3 +32,15 @@ async def delete_reaction(channel_id, post_id, emoji):
         'post_id': post_id,
         'emoji': emoji
     }
+
+
+async def save_reaction(channel_id, post_id, emoji, count):
+    await MONGODB_DB.reactions.insert_one({
+        'channel_id': channel_id,
+        'post_id': post_id,
+        'emoji': emoji,
+        'count': count
+    }
+
+                
+                                        
