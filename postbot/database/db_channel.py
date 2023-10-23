@@ -10,10 +10,10 @@ def create_post(text, media_url):
         'media_url': media_url
     }
 
-def create_channel(channel_id, user_id, sticker_id=None, emojis=None, schedule_time=None, posts=None):
+def create_channel(channel_id, admin_id, sticker_id=None, emojis=None, schedule_time=None, posts=None):
     return {
         'channel_id': channel_id,
-        'user_id': user_id,  # Changed from admin_id to user_id
+        'admin_id': admin_id,  # Changed from admin_id to user_id
         'sticker_id': sticker_id,
         'emojis': emojis if emojis is not None else [],
         'schedule_time': schedule_time,
