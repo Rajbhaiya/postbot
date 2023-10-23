@@ -14,7 +14,7 @@ async def start(bot, message:Message):
                 InlineKeyboardButton("Add Channel", callback_data="add_channel"),
                 InlineKeyboardButton("Manage Channel", callback_data="manage_channels"),
             ],
-            [InlineKeyboardButton("Send Post", callback_data="send_post_1")],
+            [InlineKeyboardButton("Send Post", callback_data="send_post")],
         ]
     )
 
