@@ -15,4 +15,5 @@ async def users_mongodb(_, msg: Message):
 
 @bot.on_message(filters.user(OWNER_ID) & filters.command("stats"))
 async def _stats(_, msg: Message):
-    await msg.reply(f"Total Users: {user_count}", quote=True)
+    x = users_count()
+    await msg.reply(f"Total Users: {x}", quote=True)
