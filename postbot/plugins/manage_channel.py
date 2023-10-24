@@ -27,7 +27,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
             except ChannelInvalid:
                 continue
 
-        buttons.append([InlineKeyboardButton("Back", callback_data="start_data")])
+        buttons.append([InlineKeyboardButton("Back", callback_data="start")])
 
         await callback_query.edit_message_text("Your channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
