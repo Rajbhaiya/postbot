@@ -34,20 +34,25 @@ async def edit_emojis_callback(bot, callback_query: CallbackQuery):
 
     # Fetch the current emojis from the database
     success, info = await get_channel_info(channel_id)
-    emojis = info.get('emojis', [])
+    
+    if success:
+        channel_data = info  # Assuming info contains the channel data
+        emojis = channel_data.get('emojis', [])
 
-    text = f"Current Emojis: {', '.join(emojis)}\n\n"
-    text += "Send the new emojis separated by commas (e.g., 😀, 😂, 😍)."
+        text = f"Current Emojis: {', '.join(emojis)}\n\n"
+        text += "Send the new emojis separated by commas (e.g., 😀, 😂, 😍)."
 
-    # Ask the user to send the new emojis
-    new_emojis_message = await bot.ask(user_id, text, timeout=300)
+        # Ask the user to send the new emojis
+        new_emojis_message = await bot.ask(user_id, text, timeout=300)
 
-    if new_emojis_message.text:
-        new_emojis = [emoji.strip() for emoji in new_emojis_message.text.split(",")]
-        await add_emojis(channel_id, new_emojis)
-        await callback_query.answer("Emojis updated successfully!")
+        if new_emojis_message.text:
+            new_emojis = [emoji.strip() for emoji in new_emojis_message.text.split(",")]
+            await add_emojis(channel_data, new_emojis)
+            await callback_query.answer("Emojis updated successfully!")
+        else:
+            await callback_query.answer("Invalid input. Please send emojis separated by commas.")
     else:
-        await callback_query.answer("Invalid input. Please send emojis separated by commas.")
+        await callback_query.answer("Channel data not found.")
 
 @bot.on_callback_query(filters.regex(r'^edit_sticker.*'))
 async def edit_sticker_callback(bot, callback_query: CallbackQuery):
