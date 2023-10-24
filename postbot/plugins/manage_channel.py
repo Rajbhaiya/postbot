@@ -39,7 +39,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^channel_options_\d+$'))
 async def channel_options_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[1])
+    channel_id = int(callback_query.data.split('_')[2])
 
     try:
         buttons = [
@@ -48,7 +48,14 @@ async def channel_options_callback(bot, callback_query: CallbackQuery):
             [InlineKeyboardButton("Back", callback_data="manage_channels")]
         ]
 
-        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="Your updated message content.",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+        # Delete the original message
+        await callback_query.message.delete()
 
     except Exception as e:
         # Handle any exceptions and log them
