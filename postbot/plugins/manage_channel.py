@@ -27,7 +27,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
             except ChannelInvalid:
                 continue
 
-        buttons.append([InlineKeyboardButton("Back", callback_data="manage_channels")])
+        buttons.append([InlineKeyboardButton("Back", callback_data="start_data")])
 
         await callback_query.edit_message_text("Your channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -39,7 +39,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^channel_options_\d+$'))
 async def channel_options_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id = int(callback_query.data.split('_')[1])
 
     try:
         buttons = [
