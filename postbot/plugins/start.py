@@ -1,8 +1,8 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from .add_channels import *
-from .manage_channel import *
-from .send_post import *
+from postbot.plugins.add_channels import *
+from postbot.plugins.manage_channel import *
+from postbot.plugins.send_post import *
 from postbot import bot
 
 @bot.on_message((filters.regex(r'^start_data$') | filters.command('start')) & filters.private)
