@@ -43,7 +43,7 @@ def clear_data(channel_id):
 
 selected_channel = {}
 
-@bot.on_callback_query(filters.regex(r'^select_channel_\d+$'))
+@bot.on_callback_query(filters.regex(r'^select_channel.*$'))
 async def select_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[1])
@@ -80,7 +80,7 @@ async def send_post_text_or_media(bot, message: Message):
     await message.reply(f"Your post content:\n\n{user_input}", reply_markup=InlineKeyboardMarkup(buttons))
 
 
-@bot.on_callback_query(filters.regex(r'^send_post_final_\d+$'))
+@bot.on_callback_query(filters.regex(r'^send_post_final.*'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[1])
@@ -119,20 +119,22 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
 async def send_post(bot, message: Message):
     user_id = message.from_user.id
 
-    user_channels = await get_channels(user_id)
+    user_id = callback_query.from_user.id
 
-    if not user_channels:
-        await message.reply("You haven't added any channels yet.")
-        return
+    try:
+        # Get the user's channels
+        user = await get_user(user_id)
+        if not user or not user.get('channels'):
+            await callback_query.answer("No channels found in your list.")
+            return
 
-    buttons = []
-    for channel in user_channels:
-        channel_name = (await bot.get_chat(channel_id)).title
-        buttons.append([InlineKeyboardButton(channel_name, callback_data=f"select_channel_{channel.id}")])
-
-    buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
-
-    await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
+        buttons = []
+        for channel_id in user['channels']:
+            try:
+                chat = await bot.get_chat(channel_id)
+                buttons.append([InlineKeyboardButton(channel_name, callback_data=f"select_channel_{channel.id}")])
+                buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
+                await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @bot.on_callback_query(filters.regex(r'^cancel_send_post$'))
 async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
@@ -142,7 +144,7 @@ async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
     await bot.set_collection(callback_query.from_user.id, "media_url", None)
     await callback_query.message.delete()
                                            
-@bot.on_callback_query(filters.regex(r'^add_emoji_\d+$'))
+@bot.on_callback_query(filters.regex(r'^add_emoji.*'))
 async def add_emoji_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -180,7 +182,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer("Emoji selection canceled.")
 
     await callback_query.answer("Emoji selection canceled.")
-@bot.on_callback_query(filters.regex(r'^cancel_emoji_\d+$'))
+@bot.on_callback_query(filters.regex(r'^cancel_emoji.*$'))
 async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -194,7 +196,7 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
 reactions = {}
 
 # Callback function to handle adding reactions
-@bot.on_callback_query(filters.regex(r'^react_\d+_.+$'))
+@bot.on_callback_query(filters.regex(r'^react.*'))
 async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id, emoji = callback_query.data.split('_')[1:]
@@ -227,7 +229,7 @@ async def react_callback(bot, callback_query: CallbackQuery):
 
     await callback_query.answer(f"You reacted with {emoji}")
 
-@bot.on_callback_query(filters.regex(r'^add_link_button_\d+$'))
+@bot.on_callback_query(filters.regex(r'^add_link_button.*'))
 async def add_link_button_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -270,7 +272,7 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
     else:
         await callback_query.answer("No link buttons provided.")
 
-@bot.on_callback_query(filters.regex(r'^delete_buttons_\d+$'))
+@bot.on_callback_query(filters.regex(r'^delete_buttons.*'))
 async def delete_buttons_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
