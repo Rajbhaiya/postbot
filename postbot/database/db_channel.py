@@ -40,12 +40,8 @@ async def add_channel(channel_id, user_id):
     channel_data = create_channel(channel_id, user_id)
     await save_channel(channel_data)
 
-async def remove_channel(channel_id, user_id):
+async def remove_channel(channel_id):
     CHANNEL_DB.channels.delete_one({'channel_id': channel_id})
-    user_data = get_user(user_id)
-    if user_data and 'channels' in user_data and channel_id in user_data['channels']:
-        user_data['channels'].remove(channel_id)
-        await update_user(user_id, user_data)
 
 async def add_schedule(channel_data, schedule_minutes):
     if channel_data['schedule_time'] is None:
