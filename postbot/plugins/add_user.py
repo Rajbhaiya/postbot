@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
-from .database.db_users import save_user, get_user, users_count
+from postbot.database.db_users import save_user, get_user, users_count
 from Config import OWNER_ID
 from postbot import bot
 
