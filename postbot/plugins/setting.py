@@ -20,8 +20,8 @@ async def channel_settings_callback(bot, callback_query: CallbackQuery):
         [InlineKeyboardButton("Delete Emoji", callback_data=f'delete_emojis_{channel_id}')],
         [InlineKeyboardButton("Back", callback_data="manage_channels")]
     ]
-reply_markup = InlineKeyboardMarkup(buttons)
-await callback_query.edit_message_reply_markup(f"**{channel_title}**", reply_markup=reply_markup)
+    reply_markup = InlineKeyboardMarkup(buttons)
+    await callback_query.edit_message_reply_markup(f"**{channel_title}**", reply_markup=reply_markup)
 
 @bot.on_callback_query(filters.regex(r'^edit_emojis.*'))
 async def edit_emojis_callback(bot, callback_query: CallbackQuery):
