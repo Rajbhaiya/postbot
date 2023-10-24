@@ -58,10 +58,14 @@ def get_schedule(channel_data):
     return channel_data['schedule_time'] if channel_data['schedule_time'] is not None else []
 
 async def add_emojis(channel_data, new_emojis):
-    if channel_data['emojis'] is None:
-        channel_data['emojis'] = []
-    channel_data['emojis'].extend(new_emojis)
-    await update_channel(channel_data['channel_id'], channel_data)
+    if isinstance(channel_data, dict) and 'emojis' in channel_data:
+        if channel_data['emojis'] is None:
+            channel_data['emojis'] = []
+        channel_data['emojis'].extend(new_emojis)
+        await update_channel(channel_data['channel_id'], channel_data)
+    else:
+        # Handle the case where channel_data is not a valid dictionary.
+        raise CustomDatabaseError("Invalid channel_data")
 
 async def remove_emojis(channel_data, emojis_to_remove):
     if channel_data['emojis'] is not None:
