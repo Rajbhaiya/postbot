@@ -5,7 +5,7 @@ from postbot.plugins.manage_channel import *
 from postbot.plugins.send_post import *
 from postbot import bot
 
-@Client.on_message(filters.command('start') & filters.private)
+@bot.on_message(filters.command('start') & filters.private)
 async def start_command(bot, message: Message):
     # Define the keyboard with three buttons
     keyboard = InlineKeyboardMarkup(
