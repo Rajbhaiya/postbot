@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from .setting import channel_settings_callback
+from postbot.plugins.setting import channel_settings_callback
 from postbot import bot
 from postbot.database.db_channel import *
 from postbot.database.db_users import *
