@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from postbot.plugins.setting import channel_settings_callback
 from postbot import bot
-from postbot.database.db_channel import remove channel as crm
+from postbot.database.db_channel import remove_channel as crm
 from postbot.database.db_users import get_user, remove_channel as urm, 
 
 # ... (other code and imports) ...
