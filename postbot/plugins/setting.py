@@ -20,7 +20,7 @@ async def channel_settings_callback(bot, callback_query: CallbackQuery):
         [InlineKeyboardButton("Back", callback_data="manage_channels")]
     ]
 
-    await bot.send_message(f"**Setting For {channel_title}**", reply_markup=InlineKeyboardMarkup(buttons))
+    await bot.send_message(f"**Setting For {channel_title}**", reply_markup=buttons)
     await callback_query.message.delete()
 
 @bot.on_callback_query(filters.regex(r'^edit_emojis.*'))
