@@ -157,6 +157,7 @@ async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
 async def add_emoji_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
+    user_channel = selected_channel.get(user_id)
 
     # Prompt the user to send emojis and store them temporarily
     await bot.send_message(user_id, "Please send the emojis separated by commas (e.g., 😀, 😂, 😍)")
@@ -200,6 +201,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
 async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
+    user_channel = selected_channel.get(user_id)
 
     # Remove the stored emojis from temp_emojis for this channel
     if channel_id in temp_emojis:
@@ -225,6 +227,7 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
 async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id, emoji = callback_query.data.split('_')[1:]
+    user_channel = selected_channel.get(user_id)
 
     # Define a unique identifier for the post (e.g., post_id)
     post_id = generate_unique_post_id()
@@ -258,6 +261,7 @@ async def react_callback(bot, callback_query: CallbackQuery):
 async def add_link_button_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
+    user_channel = selected_channel.get(user_id)
 
     # Implement the logic to handle adding link buttons
     instructions = "Please send the link buttons using the specified format. " \
@@ -310,6 +314,7 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
 async def delete_buttons_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
+    user_channel = selected_channel.get(user_id)
 
     if channel_id in temp_emojis:
         # Emoji buttons have been added, so display them along with other options
