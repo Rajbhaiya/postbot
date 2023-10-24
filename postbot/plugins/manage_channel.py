@@ -39,7 +39,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^channel_options_\d+$'))
 async def channel_options_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id = int(callback_query.data.split('_')[1])
 
     try:
         buttons = [
@@ -65,7 +65,7 @@ async def channel_options_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^delete_channel_\d+$'))
 async def delete_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id = int(callback_query.data.split('_')[1])
 
     # Remove the channel from the user's database
     user = await get_user(user_id)
