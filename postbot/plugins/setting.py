@@ -7,7 +7,6 @@ from postbot import bot
 @bot.on_callback_query(filters.regex(r'^channel_settings.*'))
 async def channel_settings_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[2])
-    chat_id = callback_query.message.chat.id
 
     # Fetch the channel information from the Telegram API
     chat = await bot.get_chat(channel_id)
@@ -20,8 +19,13 @@ async def channel_settings_callback(bot, callback_query: CallbackQuery):
         [InlineKeyboardButton("Delete Emoji", callback_data=f'delete_emojis_{channel_id}')],
         [InlineKeyboardButton("Back", callback_data="manage_channels")]
     ]
+
     reply_markup = InlineKeyboardMarkup(buttons)
-    await callback_query.edit_message_reply_markup(f"**{channel_title}**", reply_markup=reply_markup)
+
+    await callback_query.edit_message_text(
+        text=f"**Setting For {channel_title}**",
+        reply_markup=reply_markup,
+    )
 
 @bot.on_callback_query(filters.regex(r'^edit_emojis.*'))
 async def edit_emojis_callback(bot, callback_query: CallbackQuery):
