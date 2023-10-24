@@ -36,7 +36,7 @@ async def manage_channels_callback(bot, callback_query: CallbackQuery):
         print(f"Error in manage_channels_callback: {e}")
         await callback_query.answer("An error occurred. Please try again later.")
 
-@bot.on_callback_query(filters.regex(r'^channel_options_\d+$'))
+@bot.on_callback_query(filters.regex(r'^channel_options.*'))
 async def channel_options_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -62,7 +62,7 @@ async def channel_options_callback(bot, callback_query: CallbackQuery):
         print(f"Error in channel_options_callback: {e}")
         await callback_query.answer("An error occurred. Please try again later.")
 
-@bot.on_callback_query(filters.regex(r'^delete_channel_\d+$'))
+@bot.on_callback_query(filters.regex(r'^delete_channel.*'))
 async def delete_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
