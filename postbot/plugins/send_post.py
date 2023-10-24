@@ -116,7 +116,7 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer(f"Failed to send the post: {str(e)}")
 
 @bot.on_callback_query(filters.regex(r'^send_post$'))
-async def send_post(bot, message: Message):
+async def send_post(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
     try:
