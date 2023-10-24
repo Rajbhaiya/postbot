@@ -172,16 +172,14 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
         # Store the emojis temporarily
         temp_emojis[channel_id] = emojis
 
-        # Create a button for each emoji
-        emoji_buttons = [
-            [InlineKeyboardButton(emoji, callback_data=f'react_{channel_id}_{emoji}')] for emoji in emojis
-        ]
+        # Create a list of buttons for each emoji
+        emoji_buttons = [InlineKeyboardButton(emoji, callback_data=f'react_{channel_id}_{emoji}') for emoji in emojis]
 
         # Add a "Done" button to finish emoji selection
         delete_emoji = [InlineKeyboardButton("Delete Emoji", callback_data=f'cancel_emoji_{channel_id}')]
 
         # Present the user with emoji selection buttons
-        buttons = emoji_buttons + delete_emoji
+        buttons = [emoji_buttons, delete_emoji]
 
         await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -270,7 +268,7 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
         delete_url = [InlineKeyboardButton("Delete URL", callback_data=f'delete_buttons_{channel_id}')]
 
         # Present the user with emoji selection buttons
-        buttons = emoji_buttons + links_buttons + delete_emoji + delete_url
+        buttons = emoji_buttons + link_buttons + delete_emoji + delete_url
 
         await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))        
 
