@@ -117,8 +117,6 @@ async def send_post_final_callback(bot, callback_query: CallbackQuery):
 
 @bot.on_callback_query(filters.regex(r'^send_post$'))
 async def send_post(bot, message: Message):
-    user_id = message.from_user.id
-
     user_id = callback_query.from_user.id
 
     try:
@@ -132,9 +130,19 @@ async def send_post(bot, message: Message):
         for channel_id in user['channels']:
             try:
                 chat = await bot.get_chat(channel_id)
-                buttons.append([InlineKeyboardButton(channel_name, callback_data=f"select_channel_{channel.id}")])
-                buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
-                await message.reply("Select a channel to send the post:", reply_markup=InlineKeyboardMarkup(buttons))
+                # Add a button for each channel
+                buttons.append([InlineKeyboardButton(chat.title, callback_data=f'select_channel_{channel_id}')])
+            except ChannelInvalid:
+                continue
+
+        buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel_send_post")])
+
+        await callback_query.edit_message_text("Select a channel where you want send post:", reply_markup=InlineKeyboardMarkup(buttons))
+
+    except Exception as e:
+        # Handle any exceptions and log them
+        print(f"Error in send_post: {e}")
+        await callback_query.answer("An error occurred. Please try again later.")
 
 @bot.on_callback_query(filters.regex(r'^cancel_send_post$'))
 async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
