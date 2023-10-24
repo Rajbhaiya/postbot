@@ -59,36 +59,54 @@ async def edit_sticker_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
 
-    text = "Please send the sticker you want to set for this channel."
+    # Fetch the current channel data
+    success, channel_data = await get_channel_info(channel_id)
 
-    # Ask the user to send the sticker
-    sticker_message = await bot.ask(user_id, text, timeout=300)
+    if success:
+        text = "Please send the sticker you want to set for this channel."
 
-    if sticker_message.sticker:
-        sticker_id = sticker_message.sticker.file_id
-        await set_sticker(channel_id, sticker_id)
-        await callback_query.answer("Sticker set successfully!")
+        # Ask the user to send the sticker
+        sticker_message = await bot.ask(user_id, text, timeout=300)
+
+        if sticker_message.sticker:
+            sticker_id = sticker_message.sticker.file_id
+            await set_sticker(channel_data, sticker_id)
+            await callback_query.answer("Sticker set successfully!")
+        else:
+            await callback_query.answer("Invalid input. Please send a sticker.")
     else:
-        await callback_query.answer("Invalid input. Please send a sticker.")
+        await callback_query.answer("Channel data not found.")
 
 @bot.on_callback_query(filters.regex(r'^delete_sticker.*'))
 async def delete_sticker_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id = int(callback_query.data.split('_')[2)
 
-    # Remove the sticker from the channel
-    await remove_sticker(channel_id)
+    # Fetch the current channel data
+    success, channel_data = await get_channel_info(channel_id)
 
-    # Provide a callback answer
-    await callback_query.answer("Sticker deleted successfully!")
+    if success:
+        # Remove the sticker from the channel
+        await remove_sticker(channel_data)
+
+        # Provide a callback answer
+        await callback_query.answer("Sticker deleted successfully!")
+    else:
+        await callback_query.answer("Channel data not found.")
 
 @bot.on_callback_query(filters.regex(r'^delete_emojis.*'))
 async def delete_emojis_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id = int(callback_query.data.split('_')[2)
 
-    # Remove the emojis from the channel
-    await remove_emojis(channel_id)
+    # Fetch the current channel data
+    success, channel_data = await get_channel_info(channel_id)
 
-    # Provide a callback answer
-    await callback_query.answer("Emojis deleted successfully!")
+    if success:
+        # Remove the emojis from the channel
+        await remove_emojis(channel_data, channel_data.get('emojis', []))
+
+        # Provide a callback answer
+        await callback_query.answer("Emojis deleted successfully!")
+    else:
+        await callback_query.answer("Channel data not found.")
