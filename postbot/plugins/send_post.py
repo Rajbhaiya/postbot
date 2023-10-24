@@ -19,6 +19,7 @@ def generate_unique_post_id():
 
 temp_emojis = {}
 temp_buttons = {}
+reactions = {}
 
 # When a user adds emojis to a channel, store them in the dictionary
 def add_emojis(channel_id, emojis):
@@ -43,7 +44,7 @@ def clear_data(channel_id):
 
 selected_channel = {}
 
-@bot.on_callback_query(filters.regex(r'^select_channel.*$'))
+@bot.on_callback_query(filters.regex(r'^select_channel.*'))
 async def select_channel_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -189,8 +190,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
     else:
         await callback_query.answer("Emoji selection canceled.")
 
-    await callback_query.answer("Emoji selection canceled.")
-@bot.on_callback_query(filters.regex(r'^cancel_emoji.*$'))
+@bot.on_callback_query(filters.regex(r'^cancel_emoji.*'))
 async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -200,8 +200,6 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
         del temp_emojis[channel_id]
 
     await callback_query.answer("Emoji selection canceled.")
-
-reactions = {}
 
 # Callback function to handle adding reactions
 @bot.on_callback_query(filters.regex(r'^react.*'))
