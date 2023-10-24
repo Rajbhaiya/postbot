@@ -4,7 +4,7 @@ from postbot.database.db_channel import *
 from postbot import bot
 
 
-@bot.on_callback_query(filters.regex(r'^channel_settings_\d+$'))
+@bot.on_callback_query(filters.regex(r'^channel_settings.*'))
 async def channel_settings_callback(bot, callback_query: CallbackQuery):
     channel_id = int(callback_query.data.split('_')[2])
 
@@ -12,14 +12,17 @@ async def channel_settings_callback(bot, callback_query: CallbackQuery):
     chat = await bot.get_chat(channel_id)
     channel_title = chat.title
 
-    text, markup, sticker_id = await get_channel_info(channel_id)
+    buttons = [
+        [InlineKeyboardButton("Edit Sticker", callback_data=f'edit_sticker_{channel_id}')],
+        [InlineKeyboardButton("Delete Sticker", callback_data=f'delete_sticker_{channel_id}')],
+        [InlineKeyboardButton("Edit Emoji", callback_data=f'edit_emojis_{channel_id}')],
+        [InlineKeyboardButton("Delete Emoji", callback_data=f'delete_emojis_{channel_id}')],
+        [InlineKeyboardButton("Back", callback_data="manage_channels")]
+    ]
 
-    if text:
-        await callback_query.message.edit_text(f"**{channel_title}** (`{channel_id}`)\n{text}", reply_markup=InlineKeyboardMarkup(markup), quote=True)
-    else:
-        await callback_query.message.delete()
+    await callback_query.edit_message_reply_markup(f"**{channel_title}**", reply_markup=InlineKeyboardMarkup(buttons))
 
-@bot.on_callback_query(filters.regex(r'^edit_emojis_\d+$'))
+@bot.on_callback_query(filters.regex(r'^edit_emojis.*'))
 async def edit_emojis_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -41,7 +44,7 @@ async def edit_emojis_callback(bot, callback_query: CallbackQuery):
     else:
         await callback_query.answer("Invalid input. Please send emojis separated by commas.")
 
-@bot.on_callback_query(filters.regex(r'^edit_sticker_\d+$'))
+@bot.on_callback_query(filters.regex(r'^edit_sticker.*'))
 async def edit_sticker_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
@@ -57,3 +60,25 @@ async def edit_sticker_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer("Sticker set successfully!")
     else:
         await callback_query.answer("Invalid input. Please send a sticker.")
+
+@bot.on_callback_query(filters.regex(r'^delete_sticker.*'))
+async def delete_sticker_callback(bot, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    # Remove the sticker from the channel
+    await remove_sticker(channel_id)
+
+    # Provide a callback answer
+    await callback_query.answer("Sticker deleted successfully!")
+
+@bot.on_callback_query(filters.regex(r'^delete_emojis.*'))
+async def delete_emojis_callback(bot, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[2])
+
+    # Remove the emojis from the channel
+    await remove_emojis(channel_id)
+
+    # Provide a callback answer
+    await callback_query.answer("Emojis deleted successfully!")
