@@ -7,7 +7,7 @@ from postbot.database.db_users import *
 
 # ... (other code and imports) ...
 
-bot.on_callback_query(filters.regex(r'^manage_channels$'))
+@bot.on_callback_query(filters.regex(r'^manage_channels$'))
 async def manage_channels_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
