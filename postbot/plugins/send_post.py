@@ -53,7 +53,7 @@ async def select_channel_callback(bot, callback_query: CallbackQuery):
 
     await callback_query.message.reply("Please send the text for your post or /skip to post without text.")
 
-@bot.on_message(filters.private)
+@bot.on_message((filters.document|filters.video|filters.audio|filters.photo) & filters.incoming & filters.private)
 async def send_post_text_or_media(bot, message: Message):
     user_id = message.from_user.id
 
