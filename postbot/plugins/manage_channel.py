@@ -2,8 +2,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from postbot.plugins.setting import channel_settings_callback
 from postbot import bot
-from postbot.database.db_channel import *
-from postbot.database.db_users import *
+from postbot.database.db_channel import remove channel as crm
+from postbot.database.db_users import get_user, remove_channel as urm, 
 
 # ... (other code and imports) ...
 
@@ -70,7 +70,8 @@ async def delete_channel_callback(bot, callback_query: CallbackQuery):
     # Remove the channel from the user's database
     user = await get_user(user_id)
     if user and user['channels'] and channel_id in user['channels']:  # Fix: Access 'channels' as a dictionary key
-        await remove_channel(user_id, channel_id)  # Fix: Call the 'remove_channel' function
+        await urm(user_id, channel_id)  # Fix: Call the 'remove_channel' function
+        await crm(channel_id)
 
     # Notify the user
     await callback_query.answer("Channel deleted successfully.")
