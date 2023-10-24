@@ -80,7 +80,7 @@ async def edit_sticker_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^delete_sticker.*'))
 async def delete_sticker_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2)
+    channel_id = int(callback_query.data.split('_')[2])
 
     # Fetch the current channel data
     success, channel_data = await get_channel_info(channel_id)
@@ -97,7 +97,7 @@ async def delete_sticker_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^delete_emojis.*'))
 async def delete_emojis_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2)
+    channel_id = int(callback_query.data.split('_')[2])
 
     # Fetch the current channel data
     success, channel_data = await get_channel_info(channel_id)
