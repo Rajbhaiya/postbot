@@ -84,7 +84,7 @@ async def send_post_text_or_media(bot, message: Message):
 @bot.on_callback_query(filters.regex(r'^send_post_final.*'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2]
+    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
     selected_channel[user_id] = channel_id
     
@@ -159,7 +159,7 @@ async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^add_emoji.*'))
 async def add_emoji_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2]
+    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
     selected_channel[user_id] = channel_id
 
@@ -204,7 +204,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^cancel_emoji.*'))
 async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2]
+    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
     selected_channel[user_id] = channel_id
 
@@ -239,7 +239,7 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^react.*'))
 async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2]
+    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
 
     # Define a unique identifier for the post (e.g., post_id)
@@ -273,7 +273,7 @@ async def react_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^add_link_button.*'))
 async def add_link_button_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2]
+    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
     selected_channel[user_id] = channel_id
 
@@ -327,7 +327,7 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^delete_buttons.*'))
 async def delete_buttons_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2]
+    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
     selected_channel[user_id] = channel_id
 
