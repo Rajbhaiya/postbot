@@ -5,7 +5,7 @@ from .send_post import *
 
 
 @bot.on_callback_query(filters.regex(r'^add_emoji.*'))
-async def add_emoji_callback(bot, callback_query: CallbackQuery):
+async def add_emoji_callback(bot, callback_query: CallbackQuery, message: Message):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
@@ -53,7 +53,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer("Emoji selection canceled.")
 
 @bot.on_callback_query(filters.regex(r'^cancel_emoji.*'))
-async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
+async def cancel_emoji_selection(bot, callback_query: CallbackQuery, message:Message):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
@@ -91,7 +91,7 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
         await callback_query.answer("Emoji selection canceled.")
 
 @bot.on_callback_query(filters.regex(r'^add_link_button.*'))
-async def add_link_button_callback(bot, callback_query: CallbackQuery):
+async def add_link_button_callback(bot, callback_query: CallbackQuery, message:Message):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[3])
     user_channel = selected_channel.get(user_id)
@@ -154,7 +154,7 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
         await callback_query.answer("No link buttons provided.")
 
 @bot.on_callback_query(filters.regex(r'^delete_buttons.*'))
-async def delete_buttons_callback(bot, callback_query: CallbackQuery):
+async def delete_buttons_callback(bot, callback_query: CallbackQuery, message:Message):
     user_id = callback_query.from_user.id
     channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
