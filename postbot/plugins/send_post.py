@@ -84,7 +84,8 @@ async def send_post_text_or_media(bot, message: Message):
 @bot.on_callback_query(filters.regex(r'^send_post_final.*'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[1])
+    channel_id = int(callback_query.data.split('_')[2])
+    user_channel = selected_channel.get(user_id)
 
     # Collect the data that you've gathered in previous steps
     text = await bot.get_collection(user_id, "post_text")
