@@ -1,7 +1,7 @@
 from postbot import bot
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Message
-from send_post import *
+from .send_post import *
 
 
 @bot.on_callback_query(filters.regex(r'^add_emoji.*'))
