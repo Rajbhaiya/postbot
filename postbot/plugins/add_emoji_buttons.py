@@ -155,15 +155,24 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
         # Create a list of options
         buttons = [
             [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
-            link_buttons + [delete_url],
+            [link_buttons],
+            [delete_url],
             [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
             [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
         ]
 
         # If emoji buttons are added, include them
         if channel_id in temp_emojis:
-            emoji_buttons = [InlineKeyboardButton(emoji, callback_data=f'react_{channel_id}_{emoji}') for emoji in temp_emojis[channel_id]]
-            buttons[0].extend(emoji_buttons)
+    if channel_id in temp_emojis:
+        buttons = [
+            [emoji_buttons],
+            [link_buttons],
+            [delete_emoji],
+            [delete_url],
+            [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{user_channel}")],
+            [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
+            [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
+        ]
 
         await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
         await callback_query.answer("Link buttons added successfully.")
