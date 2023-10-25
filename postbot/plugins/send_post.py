@@ -239,7 +239,7 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^react.*'))
 async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    channel_id = int(callback_query.data.split('_')[1:])
     user_channel = selected_channel.get(user_id)
 
     # Define a unique identifier for the post (e.g., post_id)
@@ -310,7 +310,7 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
         options = [
             [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
             link_buttons + [delete_url],
-            [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{cuser_channel}")],
+            [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
             [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
         ]
 
