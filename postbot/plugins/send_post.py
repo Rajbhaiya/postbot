@@ -260,8 +260,19 @@ async def react_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^add_link_button.*'))
 async def add_link_button_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
-    user_channel = selected_channel.get(user_id)
+    callback_data = callback_query.data
+    # Check if the callback_data follows the expected format
+    if not callback_data.startswith("add_link_button_"):
+        await callback_query.answer("Invalid callback data format.")
+        return
+
+    try:
+        # Extract the channel_id from the callback_data
+        channel_id = int(callback_data.split('_')[2])
+    except ValueError:
+        await callback_query.answer("Invalid channel ID in callback data.")
+        return
+        user_channel = selected_channel.get(user_id)
 
     # Implement the logic to handle adding link buttons
     instructions = "Please send the link buttons using the specified format. " \
