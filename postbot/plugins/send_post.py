@@ -73,8 +73,8 @@ async def send_post_text_or_media(bot, message: Message):
     # Create a list of buttons for emojis and links
     buttons = [
         [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
-        [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{user_channel}")],
-        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
+        [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{channel_id}")],
+        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{channel_id}")],
         [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
     ]
 
@@ -211,14 +211,22 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
     # Check if link buttons are already added
     link_buttons = temp_buttons.get(channel_id, [])
 
-    # Create buttons based on the presence of emojis and links
-    buttons = [
-        [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
-        [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{user_channel}")],
-        link_buttons + (delete_link_buttons if link_buttons else []),
-        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
-        [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
-    ]
+    if link_buttons:
+        # If link buttons are added, include them along with other options
+        buttons = [
+            [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
+            link_buttons + [delete_url],
+            [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
+            [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
+        ]
+    else:
+        # If no link buttons are added, display "Add Link" along with other options
+        buttons = [
+            [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
+            [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{user_channel}")],
+            [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
+            [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
+        ]
 
     await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
     await callback_query.answer("Emoji selection canceled.")
