@@ -1,5 +1,6 @@
 from postbot import bot
 from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Message
 from send_post import *
 
 
