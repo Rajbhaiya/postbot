@@ -73,8 +73,8 @@ async def send_post_text_or_media(bot, message: Message):
     # Create a list of buttons for emojis and links
     buttons = [
         [InlineKeyboardButton("Add Emoji", callback_data=f"add_emoji_{user_channel}")],
-        [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{channel_id}")],
-        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{channel_id}")],
+        [InlineKeyboardButton("Add Link", callback_data=f"add_link_button_{user_channel}")],
+        [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
         [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
     ]
 
@@ -84,8 +84,9 @@ async def send_post_text_or_media(bot, message: Message):
 @bot.on_callback_query(filters.regex(r'^send_post_final.*'))
 async def send_post_final_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
+    selected_channel[user_id] = channel_id
+    
 
     # Collect the data that you've gathered in previous steps
     text = await bot.get_collection(user_id, "post_text")
@@ -157,8 +158,8 @@ async def cancel_send_post_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^add_emoji.*'))
 async def add_emoji_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
+    selected_channel[user_id] = channel_id
 
     # Prompt the user to send emojis and store them temporarily
     await bot.send_message(user_id, "Please send the emojis separated by commas (e.g., 😀, 😂, 😍)")
@@ -200,9 +201,9 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
 
 @bot.on_callback_query(filters.regex(r'^cancel_emoji.*'))
 async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
+    user_id = callback_query.from_user.id)
     user_channel = selected_channel.get(user_id)
+    selected_channel[user_id] = channel_id
 
     # Remove the stored emojis from temp_emojis for this channel
     if channel_id in temp_emojis:
@@ -235,7 +236,6 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^react.*'))
 async def react_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id, emoji = callback_query.data.split('_')[1:]
     user_channel = selected_channel.get(user_id)
 
     # Define a unique identifier for the post (e.g., post_id)
@@ -269,8 +269,8 @@ async def react_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^add_link_button.*'))
 async def add_link_button_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
+    selected_channel[user_id] = channel_id
 
     # Implement the logic to handle adding link buttons
     instructions = "Please send the link buttons using the specified format. " \
@@ -322,8 +322,8 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
 @bot.on_callback_query(filters.regex(r'^delete_buttons.*'))
 async def delete_buttons_callback(bot, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[2])
     user_channel = selected_channel.get(user_id)
+    selected_channel[user_id] = channel_id
 
     if channel_id in temp_emojis:
         # Emoji buttons have been added, so display them along with other options
