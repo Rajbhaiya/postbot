@@ -41,8 +41,11 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
             [InlineKeyboardButton("Send Post", callback_data=f"send_post_final_{user_channel}")],
             [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
         ]
-
-        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
 
         await callback_query.answer("Emojis added successfully.")
 
@@ -80,43 +83,12 @@ async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
             [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
         ]
 
-    await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
-    await callback_query.answer("Emoji selection canceled.")
-
-# Callback function to handle adding reactions
-@bot.on_callback_query(filters.regex(r'^react.*'))
-async def react_callback(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    channel_id = int(callback_query.data.split('_')[1:])
-    user_channel = selected_channel.get(user_id)
-
-    # Define a unique identifier for the post (e.g., post_id)
-    post_id = generate_unique_post_id()
-    post = channel.add_post(text, media_url)
-    post.unique_id = post_id  # Store the unique post_id
-
-    # Check if the post is in the reactions dictionary
-    if (channel_id, post_id) in reactions:
-        post_reactions = reactions[(channel_id, post_id)]
-    else:
-        post_reactions = {}
-
-    # Check if the emoji has already been reacted by the user
-    if user_id in post_reactions:
-        await callback_query.answer("You've already reacted with this emoji.")
-        return
-
-    # Add the user's reaction to the post_reactions dictionary
-    post_reactions[user_id] = emoji
-    reactions[(channel_id, post_id)] = post_reactions
-
-    # You can store the reactions in your database or process them as needed
-    # For example, let's say you have a Post and Reaction model:
-    # You can create a Reaction object and link it to the corresponding post.
-    reaction = Reaction(post_id, user_id, emoji)
-    await reaction.save()  # Save the reaction in your database
-
-    await callback_query.answer(f"You reacted with {emoji}")
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+        await callback_query.answer("Emoji selection canceled.")
 
 @bot.on_callback_query(filters.regex(r'^add_link_button.*'))
 async def add_link_button_callback(bot, callback_query: CallbackQuery):
@@ -172,7 +144,11 @@ async def add_link_button_callback(bot, callback_query: CallbackQuery):
                 [InlineKeyboardButton("Cancel", callback_data="cancel_send_post")]
             ]
 
-        await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
         await callback_query.answer("Link buttons added successfully.")
     else:
         await callback_query.answer("No link buttons provided.")
@@ -203,6 +179,45 @@ async def delete_buttons_callback(bot, callback_query: CallbackQuery):
 
     # Implement code to delete buttons for the specific channel
     delete_temp_buttons(channel_id)
-
-    await callback_query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+    await bot.edit_message_reply_markup(
+        chat_id=callback_query.message.chat.id,
+        message_id=callback_query.message.message_id,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
     await callback_query.answer("Buttons deleted successfully.")
+
+
+# Callback function to handle adding reactions
+@bot.on_callback_query(filters.regex(r'^react.*'))
+async def react_callback(bot, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    channel_id = int(callback_query.data.split('_')[1:])
+    user_channel = selected_channel.get(user_id)
+
+    # Define a unique identifier for the post (e.g., post_id)
+    post_id = generate_unique_post_id()
+    post = channel.add_post(text, media_url)
+    post.unique_id = post_id  # Store the unique post_id
+
+    # Check if the post is in the reactions dictionary
+    if (channel_id, post_id) in reactions:
+        post_reactions = reactions[(channel_id, post_id)]
+    else:
+        post_reactions = {}
+
+    # Check if the emoji has already been reacted by the user
+    if user_id in post_reactions:
+        await callback_query.answer("You've already reacted with this emoji.")
+        return
+
+    # Add the user's reaction to the post_reactions dictionary
+    post_reactions[user_id] = emoji
+    reactions[(channel_id, post_id)] = post_reactions
+
+    # You can store the reactions in your database or process them as needed
+    # For example, let's say you have a Post and Reaction model:
+    # You can create a Reaction object and link it to the corresponding post.
+    reaction = Reaction(post_id, user_id, emoji)
+    await reaction.save()  # Save the reaction in your database
+
+    await callback_query.answer(f"You reacted with {emoji}")
