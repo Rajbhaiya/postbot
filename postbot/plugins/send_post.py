@@ -201,7 +201,7 @@ async def add_emoji_callback(bot, callback_query: CallbackQuery):
 
 @bot.on_callback_query(filters.regex(r'^cancel_emoji.*'))
 async def cancel_emoji_selection(bot, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id)
+    user_id = callback_query.from_user.id
     user_channel = selected_channel.get(user_id)
     selected_channel[user_id] = channel_id
 
